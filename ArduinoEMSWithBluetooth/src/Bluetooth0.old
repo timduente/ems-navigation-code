@@ -1,0 +1,124 @@
+/*
+ * old.cpp
+ *
+ *  Created on: 07.05.2014
+ *      Author: Tim Dünte
+ */
+
+
+/*
+ Zwei LED kÃ¶nnen Ã¼ber eine serielle Bluetoothverbindung an und ausgeschaltet werden.
+ */
+
+/*
+#include <Arduino.h>
+#include "EMSChannel.h"
+
+//Bietet die Moeglichkeit einen weiteren seriellen Anschluss zu erstellen
+#include "SoftwareSerial/SoftwareSerial.h"
+
+//Bindet die SPI Bibliothek ein. Über SPI läuft die Kommunikation mit dem digitalen Potentiometer
+#include "SPI/SPI.h"
+//Eine Klasse für digitale Potentiometer vom MCP
+#include "McpDigitalPot.h"
+
+// Pin 13 ist mit dem zweiten Relais verbunden. Pin 12 mit dem ersten.
+const int opto1 = 6;
+const int opto2 = 7;
+
+//Pins fuer die serielle Verbindung zum Bluetoothchip
+const int rxPin = 2; //Receive
+const int txPin = 3; //Transfer
+
+//Pin für den ChipSelect Port des Dig.Potis
+const int _csPoti = 10;
+
+SoftwareSerial bluetooth(rxPin, txPin); //Neuer Serieller Port
+McpDigitalPot digitalPoti(_csPoti, 5000);
+
+void initBluetoothChip() {
+	//Dieser komplette Block ist im Moment noch notwendig um eine serielle Verbindung zum Chip aufbauen zu kÃ¶nnen.
+	bluetooth.begin(115200);        // The Bluetooth Mate defaults to 115200bps
+	delay(320);                     // IMPORTANT DELAY! (Minimum ~276ms)
+	bluetooth.print("$$$");         // Enter command mode
+	delay(15);                      // IMPORTANT DELAY! (Minimum ~10ms)
+	bluetooth.println("U,9600,N"); // Temporarily Change the baudrate to 9600, no parity
+	bluetooth.println("---");
+	bluetooth.begin(9600);          // Start bluetooth serial at 9600
+	delay(320);
+	bluetooth.println("Bluetooth bereit");
+}
+
+// the setup routine runs once when you press reset:
+void setup() {
+
+	// initialize the digital pin as an output.
+	pinMode(opto1, OUTPUT);
+	pinMode(opto2, OUTPUT);
+
+	//Initialierung einer seriellen Verbindung zum PC
+	Serial.begin(9600);
+	Serial.println("Serial bereit");
+	delay(550);
+	initBluetoothChip();
+
+	//Beide Relais werden geschlossen
+	digitalWrite(opto2, LOW);
+	digitalWrite(opto1, LOW);
+
+	//SPI-Verbindung herstellen.
+	//SPI.setClockDivider(SPI_CLOCK_DIV128);
+	SPI.begin();
+}
+
+void doCommand(char c) {
+	//Mit 1 und 2 wird der eine Kanal geschaltet.
+	if (c == '1') {
+		digitalWrite(opto1, HIGH);
+	} else if (c == '2') {
+		digitalWrite(opto1, LOW);
+	}
+	//Mit 3 und 4 der zweite Kanal
+	else if (c == '3') {
+		digitalWrite(opto2, HIGH);
+	} else if (c == '4') {
+		digitalWrite(opto2, LOW);
+	}
+	//Mit 5 und 6 lässt sich
+	else if (c == '5') {
+		digitalPoti.writePosition(0, 120);
+		Serial.println(digitalPoti.getPosition(0));
+	} else if (c == '6') {
+		digitalPoti.writePosition(0, 0);
+		Serial.println(digitalPoti.getPosition(0));
+	}
+	//Mit 7 und 8 lässt sich LED 3 in einer Schritten incrementieren und decrementieren.
+	else if (c == '7') {
+		digitalPoti.increment();
+		Serial.println(digitalPoti.getPosition(0));
+	} else if (c == '8') {
+		digitalPoti.decrement();
+		Serial.println(digitalPoti.getPosition(0));
+	}
+}
+
+// the loop routine runs over and over again forever:
+void loop() {
+	if (bluetooth.available()) {
+		char c = (char) bluetooth.read();
+		//Mit 1 und 2 wird der eine Kanal geschaltet.
+		doCommand(c);
+
+		//Alle Daten die der Bluetoothchip sendet werden an die serielle Verbindung zum PC gesendet
+		Serial.write(c);
+		//bluetooth.write(c);
+	}
+
+	if (Serial.available()) {
+		char c = (char) Serial.read();
+		doCommand(c);
+		//Alle Daten die ich in der seriellen Konsole eingebe werden an den Bluetoothchip gesendet.
+		bluetooth.write(c);
+	}
+}
+*/
