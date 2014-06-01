@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Navigation</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="startText">Start:</string>
+    <string name="zielText">Ziel:</string>
+    <string name="info_akt_posi">Hier siehst du deine aktuelle Position</string>
+    <string name="standard_start">Großgoltern Ohweg 18</string>
+    <string name="standard_ziel">Großgoltern Wilhelm Kruse Straße 37</string>
+    <string name="calcRoute">Route berechnen</string>
+    <string name="content_desc_rl">Rechts oder Links</string>
+    <string name="title_activity_bluetooth__console">Bluetooth_Console</string>
+    <string name="bluetooth_send_button">Send</string>
+    <string name="bluetooth_send_text_help">Hier kann Text eingegeben werden, der zum Arduino gesendet werden soll.</string>
+    <string name="bluetooth_connect_button">Connect</string>
+    <string name="bluetooth_disconnect_button">Disconect</string>
+    <string name="emptyText"></string>
+    <string name="title_activity_compass">Compass</string>
+    <string name="calibrate_button">Handy vor mir</string>
+    <string name="calibrate_button_finished">Handy in Hose</string>
+    <string name="button_3_Pulses_Text">Send 3 Pulses</string>
+    <string name="title_activity_dummy_app">DummyApp</string>
+    <string name="title_activity_calibration">Calibration</string>
+
+</resources>
