@@ -13,6 +13,10 @@ import org.json.JSONObject;
 import com.example.navigation.*;
 
 import de.duente.navigation.actions.CommandManager;
+import de.duente.navigation.bluetooth.BluetoothConnector;
+import de.duente.navigation.route.GeoPoint;
+import de.duente.navigation.route.Route;
+import de.duente.navigation.route.Step;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -34,11 +38,14 @@ public class ShowPosition extends Activity {
 	private final static String MANEUVER_FOLLOW = "follow";
 	private final static String MANEUVER_RIGHT = "turn-right";
 	private final static String MANEUVER_LEFT = "turn-left";
-	
+
 	private final static int EMS_CHANNEL_RIGHT = 0;
 	private final static int EMS_CHANNEL_LEFT = 1;
-	
+
+	public static final int REQUEST_CODE_CALIBRATION = 212;
+
 	private Route route = new Route();
+	private float[] intensity = new float[2];
 
 	private final static int REQUEST_ENABLE_BT = 1;
 
@@ -58,11 +65,13 @@ public class ShowPosition extends Activity {
 			if (route.getSize() > 0) {
 				route.updateNextWayPoint(location);
 				updateImage(route.getActStep().getText());
-				updateArduino(route.getActStep().getText(), route.getDistanceToStep(route.getActWayPoint(), location));
-				if(lastLocation != null){
-					//Richtung berechnen aus letzer Location und location.
-					//double actDirection = GeoPoint.calculateAngle(from, to);
-					
+				updateArduino(route.getActStep().getText(),
+						route.getDistanceToStep(route.getActWayPoint(),
+								location));
+				if (lastLocation != null) {
+					// Richtung berechnen aus letzer Location und location.
+					// double actDirection = GeoPoint.calculateAngle(from, to);
+
 				}
 			}
 
@@ -168,15 +177,19 @@ public class ShowPosition extends Activity {
 		getMenuInflater().inflate(R.menu.show_position, menu);
 		return true;
 	}
-	
-	private void updateArduino(String direction, double distanceToNextStep){
+
+	private void updateArduino(String direction, double distanceToNextStep) {
 		if (direction.equals(MANEUVER_RIGHT)) {
-			if(distanceToNextStep <= 550.0){
-				CommandManager.setPulseForTime(EMS_CHANNEL_RIGHT, 50, System.currentTimeMillis(), (int)distanceToNextStep / 100, 1000, 1000, 0);
-			}		
+			if (distanceToNextStep <= 550.0) {
+				CommandManager.setPulseForTime(EMS_CHANNEL_RIGHT, 50,
+						System.currentTimeMillis(),
+						(int) distanceToNextStep / 100, 1000, 1000, 0);
+			}
 		} else if (direction.equals(MANEUVER_LEFT)) {
-			if(distanceToNextStep <= 550.0){
-				CommandManager.setPulseForTime(EMS_CHANNEL_LEFT, 50, System.currentTimeMillis(), (int)distanceToNextStep / 100, 1000, 1000, 0);
+			if (distanceToNextStep <= 550.0) {
+				CommandManager.setPulseForTime(EMS_CHANNEL_LEFT, 50,
+						System.currentTimeMillis(),
+						(int) distanceToNextStep / 100, 1000, 1000, 0);
 			}
 		}
 	}
@@ -220,6 +233,28 @@ public class ShowPosition extends Activity {
 		super.onDestroy();
 	}
 
+	/**Startet die Kalibrierungsaktivitaet. Uebergibt die letzte Werte.
+	 * 
+	 * @param view view der diese Methode aufruft
+	 */
+	public void startCalibrationActivity(View view) {
+		Intent intent = new Intent(this, Calibration.class);
+		intent.putExtra(Calibration.CALIBRATION_VALUES, intensity);
+		intent.putExtra(Calibration.BLUETOOTH_MANAGED_BY_STARTING_ACTIVITY, true);
+		startActivityForResult(intent, REQUEST_CODE_CALIBRATION);
+	}
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (requestCode == REQUEST_CODE_CALIBRATION && resultCode == RESULT_OK
+				&& data.hasExtra(Calibration.CALIBRATION_VALUES)) {
+
+			intensity = data
+					.getFloatArrayExtra(Calibration.CALIBRATION_VALUES);
+		}
+	}
+
 	/**
 	 * Stellt eine Verbindung zum Arduino her. Der Verbindungsaufbau kann lange
 	 * dauern. Hierdurch wird der UI-Thread entlastet und es ist möglich eine
@@ -239,7 +274,7 @@ public class ShowPosition extends Activity {
 				bluetoothConnector[0].connectBluetooth();
 				return true;
 			} catch (IOException e) {
-				//e.printStackTrace();
+				// e.printStackTrace();
 				return false;
 			}
 		}

@@ -98,4 +98,13 @@
         android:onClick="connectBluetooth"
         android:text="@string/bluetooth_connect_button" />
 
+    <Button
+        android:id="@+id/buttonCalibration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/routInfotext"
+        android:layout_alignLeft="@+id/routInfotext"
+        android:onClick="startCalibrationActivity"
+        android:text="@string/button_text_calibration" />
+
 </RelativeLayout>

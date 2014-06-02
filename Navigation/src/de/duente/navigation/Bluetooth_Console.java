@@ -6,6 +6,7 @@ import java.io.InputStream;
 import com.example.navigation.R;
 
 import de.duente.navigation.actions.CommandManager;
+import de.duente.navigation.bluetooth.BluetoothConnector;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;

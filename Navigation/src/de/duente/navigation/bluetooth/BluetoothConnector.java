@@ -1,4 +1,4 @@
-package de.duente.navigation;
+package de.duente.navigation.bluetooth;
 
 import java.io.IOException;
 import java.io.InputStream;

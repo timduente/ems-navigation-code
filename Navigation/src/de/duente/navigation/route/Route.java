@@ -1,4 +1,4 @@
-package de.duente.navigation;
+package de.duente.navigation.route;
 
 import java.util.ArrayList;
 

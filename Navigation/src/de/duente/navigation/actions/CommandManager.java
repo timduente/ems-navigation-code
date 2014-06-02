@@ -2,7 +2,7 @@ package de.duente.navigation.actions;
 
 import java.io.IOException;
 
-import de.duente.navigation.BluetoothConnector;
+import de.duente.navigation.bluetooth.BluetoothConnector;
 
 /**
  * Die CommandManager Klasse steht verwaltet die Actions in der ActionList.

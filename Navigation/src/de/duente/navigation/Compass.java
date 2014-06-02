@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.example.navigation.R;
 
+import de.duente.navigation.route.GeoPoint;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
