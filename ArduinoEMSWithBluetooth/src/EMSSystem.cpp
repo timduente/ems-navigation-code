@@ -78,16 +78,16 @@ void EMSSystem::doActionCommand(String *command) {
 		String intensity_s = command->substring(1, seperatorChannel);
 
 		int intensity = intensity_s.toInt();
-		Serial.print("Intensity:");
-		Serial.println(intensity);
-		Serial.flush();
+//		Serial.print("Intensity:");
+//		Serial.println(intensity);
+//		Serial.flush();
 		String channel_s = command->substring(seperatorChannel + 1,
 				seperatorStepTime);
 
 		int channel = channel_s.toInt();
-		Serial.print("channel: ");
-		Serial.println(channel);
-		Serial.flush();
+//		Serial.print("channel: ");
+//		Serial.println(channel);
+//		Serial.flush();
 		String stepTime_s = command->substring(seperatorStepTime + 1,
 				seperatorSignaleLength);
 		int stepTime = stepTime_s.toInt();
@@ -95,15 +95,15 @@ void EMSSystem::doActionCommand(String *command) {
 		String signalLength_s = command->substring(seperatorSignaleLength + 1,
 				command->length());
 		int signalLength = signalLength_s.toInt();
-		Serial.print("Signallaenge:");
-		Serial.println(signalLength);
-		Serial.flush();
+//		Serial.print("Signallaenge:");
+//		Serial.println(signalLength);
+//		Serial.flush();
 
 		emsChannels[channel]->setIncreaseDecreaseTime(stepTime);
 
-		Serial.print("Steptime:");
-		Serial.println(stepTime);
-		Serial.flush();
+//		Serial.print("Steptime:");
+//		Serial.println(stepTime);
+//		Serial.flush();
 
 		if (channel < size) {
 			emsChannels[channel]->activate();

@@ -155,6 +155,8 @@ void EMSChannel::setIntensity(int intensity, bool increaseDecrease,
 		return;
 	}
 
+	intensity = int (127.0f * intensity / 100.0f + 0.5f);
+
 	int resistorLevel = 127;
 	if (intensity > 127) {
 		this->intensity = 127;
@@ -176,6 +178,9 @@ void EMSChannel::setIntensity(int intensity, bool increaseDecrease,
 	} else {
 		digitalPoti->setPosition(whiperIndex, intensity);
 	}
+	Serial.print("Stufe des dig. Potis: ");
+	Serial.println(digitalPoti->getPosition(whiperIndex));
+	Serial.flush();
 	endTime = millis() + time;
 }
 
