@@ -7,8 +7,8 @@
     <string name="startText">Start:</string>
     <string name="zielText">Ziel:</string>
     <string name="info_akt_posi">Hier siehst du deine aktuelle Position</string>
-    <string name="standard_start">Großgoltern Ohweg 18</string>
-    <string name="standard_ziel">Großgoltern Wilhelm Kruse Straße 37</string>
+    <string name="standard_start">Hannover Appelstraße 9a</string>
+    <string name="standard_ziel">Hannover Welfengarten 1</string>
     <string name="calcRoute">Route berechnen</string>
     <string name="content_desc_rl">Rechts oder Links</string>
     <string name="title_activity_bluetooth__console">Bluetooth_Console</string>

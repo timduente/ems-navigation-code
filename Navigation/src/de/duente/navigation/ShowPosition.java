@@ -38,6 +38,8 @@ public class ShowPosition extends Activity {
 	private final static String MANEUVER_FOLLOW = "follow";
 	private final static String MANEUVER_RIGHT = "turn-right";
 	private final static String MANEUVER_LEFT = "turn-left";
+	private final static String MANEUVER_SLIGHT_RIGHT = "turn-slight-right";
+	private final static String MANEUVER_SLIGHT_LEFT = "turn-slight-left";
 
 	private final static int EMS_CHANNEL_RIGHT = 0;
 	private final static int EMS_CHANNEL_LEFT = 1;
@@ -179,15 +181,19 @@ public class ShowPosition extends Activity {
 	}
 
 	private void updateArduino(String direction, double distanceToNextStep) {
-		if (direction.equals(MANEUVER_RIGHT)) {
+		if (direction.equals(MANEUVER_RIGHT)
+				|| direction.equals(MANEUVER_SLIGHT_RIGHT)) {
 			if (distanceToNextStep <= 550.0) {
-				CommandManager.setPulseForTime(EMS_CHANNEL_RIGHT, 50,
+				CommandManager.setPulseForTime(EMS_CHANNEL_RIGHT,
+						(int) intensity[EMS_CHANNEL_RIGHT],
 						System.currentTimeMillis(),
 						(int) distanceToNextStep / 100, 1000, 1000, 0);
 			}
-		} else if (direction.equals(MANEUVER_LEFT)) {
+		} else if (direction.equals(MANEUVER_LEFT)
+				|| direction.equals(MANEUVER_SLIGHT_LEFT)) {
 			if (distanceToNextStep <= 550.0) {
-				CommandManager.setPulseForTime(EMS_CHANNEL_LEFT, 50,
+				CommandManager.setPulseForTime(EMS_CHANNEL_LEFT,
+						(int) intensity[EMS_CHANNEL_LEFT],
 						System.currentTimeMillis(),
 						(int) distanceToNextStep / 100, 1000, 1000, 0);
 			}
@@ -203,10 +209,24 @@ public class ShowPosition extends Activity {
 			imView.setImageResource(R.drawable.left);
 		} else if (direction.equals(MANEUVER_FOLLOW)) {
 			imView.setImageResource(R.drawable.forward);
+		} else if (direction.equals(MANEUVER_SLIGHT_LEFT)) {
+			imView.setImageResource(R.drawable.slight_left);
+		} else if (direction.equals(MANEUVER_SLIGHT_RIGHT)) {
+			imView.setImageResource(R.drawable.slight_right);
 		} else {
 			imView.setVisibility(ImageView.INVISIBLE);
 		}
 
+	}
+
+	public void fakeGPS(View view) {
+		if (route != null) {
+			Location location = new Location("Tim GPS Provider");
+			location.setAltitude(route.getActStep().getEnd().getLatitude());
+			location.setLongitude(route.getActStep().getEnd().getLongitude());
+			locationListener.onLocationChanged(location);
+			// route.setActWayPoint(route.getActWayPoint()+ 1);
+		}
 	}
 
 	public void findRoute(View view) {
@@ -233,14 +253,17 @@ public class ShowPosition extends Activity {
 		super.onDestroy();
 	}
 
-	/**Startet die Kalibrierungsaktivitaet. Uebergibt die letzte Werte.
+	/**
+	 * Startet die Kalibrierungsaktivitaet. Uebergibt die letzte Werte.
 	 * 
-	 * @param view view der diese Methode aufruft
+	 * @param view
+	 *            view der diese Methode aufruft
 	 */
 	public void startCalibrationActivity(View view) {
 		Intent intent = new Intent(this, Calibration.class);
 		intent.putExtra(Calibration.CALIBRATION_VALUES, intensity);
-		intent.putExtra(Calibration.BLUETOOTH_MANAGED_BY_STARTING_ACTIVITY, true);
+		intent.putExtra(Calibration.BLUETOOTH_MANAGED_BY_STARTING_ACTIVITY,
+				true);
 		startActivityForResult(intent, REQUEST_CODE_CALIBRATION);
 	}
 
@@ -250,8 +273,7 @@ public class ShowPosition extends Activity {
 		if (requestCode == REQUEST_CODE_CALIBRATION && resultCode == RESULT_OK
 				&& data.hasExtra(Calibration.CALIBRATION_VALUES)) {
 
-			intensity = data
-					.getFloatArrayExtra(Calibration.CALIBRATION_VALUES);
+			intensity = data.getFloatArrayExtra(Calibration.CALIBRATION_VALUES);
 		}
 	}
 

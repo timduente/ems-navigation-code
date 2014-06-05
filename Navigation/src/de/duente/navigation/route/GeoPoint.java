@@ -2,13 +2,28 @@ package de.duente.navigation.route;
 
 public class GeoPoint {
 	double longitude;
+
+	/**
+	 * @return the longitude
+	 */
+	public double getLongitude() {
+		return longitude;
+	}
+
+	/**
+	 * @return the latitude
+	 */
+	public double getLatitude() {
+		return latitude;
+	}
+
 	double latitude;
 
 	public GeoPoint() {
 		this.latitude = 0.0;
 		this.longitude = 0.0;
 	}
-	
+
 	public GeoPoint(double latitude, double longitude) {
 		this.latitude = latitude;
 		this.longitude = longitude;
@@ -30,8 +45,8 @@ public class GeoPoint {
 	}
 
 	/**
-	 * Berechnet den Richtungswinkel für zwei GeoPoint Objekte in
-	 * Bezug auf den Nordvektor.
+	 * Berechnet den Richtungswinkel für zwei GeoPoint Objekte in Bezug auf den
+	 * Nordvektor.
 	 * 
 	 * @param from
 	 *            Momentane Position

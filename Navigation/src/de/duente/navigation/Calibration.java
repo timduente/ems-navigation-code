@@ -29,16 +29,17 @@ import android.widget.TextView;
 public class Calibration extends Activity {
 	public static final String CALIBRATION_VALUES = "calibrationValues";
 	public static final String BLUETOOTH_MANAGED_BY_STARTING_ACTIVITY = "Bluetooth is managed by the activity, which starts this Activity";
+	
+private static final float STEPS_IN_PERCENT = 4.0f;
 
-	// Floatingpoint insgesammt 6 Stellen 2 Nachkomma stellen mit Prozentzeich
-	// dahinter.
-	private static final String NUMBER_FORMAT = "%6.2f%%";
+	// Floatingpoint insgesammt 6 Stellen 0 Nachkomma stellen mit Prozentzeichen
+	// da hinter.
+	private static final String NUMBER_FORMAT = "%6.0f%%";
 
 	private String[] state = { "0", "1" };
 	private float[] calibrationSettings = new float[state.length];
 
 	float shownIntensity = 0.0f;
-	int intensity = 0;
 	int times = 0;
 
 	// GUI Elemente
@@ -51,22 +52,18 @@ public class Calibration extends Activity {
 	private Runnable runnable = new Runnable() {
 		@Override
 		public void run() {
-			shownIntensity = times * 100.0f / 127.0f;
-			intensity = (int) shownIntensity;
-
+			shownIntensity = shownIntensity + STEPS_IN_PERCENT;
+			
 			textCurrentIntensityInPercent.setText(String.format(NUMBER_FORMAT,
 					shownIntensity));
-
 			String selectedChannel = (String) spinner.getSelectedItem();
-			// System.out.println("Channel der ausgewählt wurde: "
-			// + selectedChannel + "Times: " + times);
-
 			CommandManager.setIntensityForTime(
-					Integer.parseInt(selectedChannel), intensity, 500, 0);
-			times = times + 5;
+					Integer.parseInt(selectedChannel),(int) shownIntensity, 500, 0);
 
 			if (shownIntensity < 100.0f) {
 				handler.postDelayed(this, 1000);
+			}else{
+				stopCalibration(null);
 			}
 		}
 	};
@@ -94,7 +91,8 @@ public class Calibration extends Activity {
 		textCurrentIntensityInPercent = (TextView) findViewById(R.id.textIntensityPercent);
 		textLastIntensityPercent = (TextView) findViewById(R.id.textLastIntensityPercent);
 
-		textCurrentIntensityInPercent.setText(String.format(NUMBER_FORMAT, 0.0f));
+		textCurrentIntensityInPercent.setText(String
+				.format(NUMBER_FORMAT, 0.0f));
 		textLastIntensityPercent.setText(String.format(NUMBER_FORMAT, 0.0f));
 
 		ArrayAdapter<String> adapter_state = new ArrayAdapter<String>(this,
@@ -107,8 +105,8 @@ public class Calibration extends Activity {
 			public void onItemSelected(AdapterView<?> parentView,
 					View selectedItemView, int position, long id) {
 				String selectedChannel = (String) spinner.getSelectedItem();
-				textCurrentIntensityInPercent.setText(String.format(NUMBER_FORMAT,
-						0.0f));
+				textCurrentIntensityInPercent.setText(String.format(
+						NUMBER_FORMAT, 0.0f));
 				textLastIntensityPercent.setText(String.format(NUMBER_FORMAT,
 						calibrationSettings[Integer.parseInt(selectedChannel)]));
 			}
@@ -117,12 +115,11 @@ public class Calibration extends Activity {
 			public void onNothingSelected(AdapterView<?> parentView) {
 				// nichts passiert.
 			}
-
 		});
 
 		// Wenn die Aktivitaet alleine gestartet wird muss sie sich selbst um
 		// eine Bluetoothverbindung kümmern. Ansonsten ist diese schon in der
-		// anderen Activity initialisiert.
+		// anderen Activity initialisiert. TODO: Loeschen
 		if (!startIntent.getBooleanExtra(
 				BLUETOOTH_MANAGED_BY_STARTING_ACTIVITY, false)) {
 
@@ -177,13 +174,17 @@ public class Calibration extends Activity {
 		super.onBackPressed();
 	}
 
-	/**Stoppt das Steigern der Intensitaet. Die zuletzt angezeigte Intensitaet wird gesichert.
+	/**
+	 * Stoppt das Steigern der Intensitaet. Die zuletzt angezeigte Intensitaet
+	 * wird gesichert.
 	 * 
-	 * @param view View von dem diese Methode aufgerufen wurde.
+	 * @param view
+	 *            View von dem diese Methode aufgerufen wurde.
 	 */
 	public void stopCalibration(View view) {
 		handler.removeCallbacks(runnable);
 		spinner.setEnabled(true);
+		findViewById(R.id.buttonStartCalibration).setEnabled(true);
 
 		String s = (String) spinner.getSelectedItem();
 		calibrationSettings[Integer.parseInt(s)] = shownIntensity;
@@ -191,27 +192,34 @@ public class Calibration extends Activity {
 				shownIntensity));
 	}
 
-	/**Startet das Steigern der Intensitaet. Laeuft bis 100% oder bis Stopp gedrueckt wurde.
+	/**
+	 * Startet das Steigern der Intensitaet. Laeuft bis 100% oder bis Stopp
+	 * gedrueckt wurde.
 	 * 
-	 * @param view View von dem diese Methode aufgerufen wurde.
+	 * @param view
+	 *            View von dem diese Methode aufgerufen wurde.
 	 */
 	public void startCalibration(View view) {
 		shownIntensity = 0.0f;
 		times = 0;
 		handler.postDelayed(runnable, 100);
 		spinner.setEnabled(false);
+		view.setEnabled(false);
 
 	}
 
-	/**Aktiviert den Kanal fuer eine Sekunde mit der zuletzt kalibrierten Intensitaet.
+	/**
+	 * Aktiviert den Kanal fuer eine Sekunde mit der zuletzt kalibrierten
+	 * Intensitaet.
 	 * 
-	 * @param view View von dem diese Methode aufgerufen wurde.
+	 * @param view
+	 *            View von dem diese Methode aufgerufen wurde.
 	 */
 	public void testIntensity(View view) {
 		String s = (String) spinner.getSelectedItem();
 		int channel = Integer.parseInt(s);
 		CommandManager.setIntensityForTime(channel,
-				(int) calibrationSettings[channel], 500, 0);
+				(int) calibrationSettings[channel], 1000, 0);
 	}
 
 }
