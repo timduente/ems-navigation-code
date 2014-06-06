@@ -1,5 +1,7 @@
 package de.duente.navigation.route;
 
+import android.location.Location;
+
 public class GeoPoint {
 	double longitude;
 
@@ -27,6 +29,11 @@ public class GeoPoint {
 	public GeoPoint(double latitude, double longitude) {
 		this.latitude = latitude;
 		this.longitude = longitude;
+	}
+	
+	public GeoPoint(Location location){
+		this.latitude = location.getAltitude();
+		this.longitude = location.getLongitude();
 	}
 
 	public double distanceTo(GeoPoint geoPoint) {

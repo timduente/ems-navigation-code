@@ -6,34 +6,59 @@ import android.location.Location;
 
 public class Route {
 	private ArrayList<Step> stepsToDo;
-	private int actWayPoint;
+	
+	private int actStepNumber;
+	private String startLocation;
+	/**
+	 * @return the startLocation
+	 */
+	public String getStartLocation() {
+		return startLocation;
+	}
+
+	/**
+	 * @param startLocation the startLocation to set
+	 */
+	public void setStartLocation(String startLocation) {
+		this.startLocation = startLocation;
+	}
+
+	/**
+	 * @return the endLocation
+	 */
+	public String getEndLocation() {
+		return endLocation;
+	}
+
+	/**
+	 * @param endLocation the endLocation to set
+	 */
+	public void setEndLocation(String endLocation) {
+		this.endLocation = endLocation;
+	}
+
+	private String endLocation;
 	
 	public static double MIN_DISTANCE_TO_WAYPOINT = 20.0;
 
 	public Route() {
 		stepsToDo = new ArrayList<Step>();
-		actWayPoint = -1;
+		actStepNumber = -1;
 	}
 
 	/**
-	 * @return the actWayPoint
+	 * @return Nummer des aktuellen Schritts
 	 */
-	public int getActWayPoint() {
-		return actWayPoint;
+	public int getActStepNumber() {
+		return actStepNumber;
 	}
 
-	/**
-	 * @param actWayPoint
-	 *            the actWayPoint to set
-	 */
-	public void setActWayPoint(int actWayPoint) {
-		this.actWayPoint = actWayPoint;
-	}
+
 
 	public void addStep(Step step) {
 		stepsToDo.add(step);
 		if (stepsToDo.size() == 1) {
-			actWayPoint = 0;
+			actStepNumber = 0;
 		}
 	}
 
@@ -50,8 +75,8 @@ public class Route {
 	}
 
 	public Step getActStep() {
-		if (isIndexInRange(actWayPoint)) {
-			return stepsToDo.get(actWayPoint);
+		if (isIndexInRange(actStepNumber)) {
+			return stepsToDo.get(actStepNumber);
 		} else {
 			return null;
 		}
@@ -73,7 +98,7 @@ public class Route {
 	public void updateNextWayPoint(Location updateLocation) {
 		double minDistance = -1.0;
 		int step = 0;
-		for (int i = actWayPoint; i < stepsToDo.size(); i++) {
+		for (int i = actStepNumber; i < stepsToDo.size(); i++) {
 			Location stepStartLocation = new Location(updateLocation);
 			double iDistance = 0.0;
 
@@ -82,13 +107,14 @@ public class Route {
 					.setLongitude(stepsToDo.get(i).getStart().longitude);
 			iDistance = stepStartLocation.distanceTo(updateLocation);
 
-			if (minDistance <= 0 || minDistance >= iDistance) {
+			if (minDistance < 0.0 || minDistance >= iDistance) {
 				minDistance = iDistance;
 				step = i;
 			}
 		}
+		//System.out.println("minDistance: " +minDistance + " step: " + step);
 		if (minDistance < MIN_DISTANCE_TO_WAYPOINT) {
-			actWayPoint = step;
+			actStepNumber = step;
 		}
 	}
 
