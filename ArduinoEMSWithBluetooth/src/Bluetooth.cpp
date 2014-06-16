@@ -11,10 +11,10 @@
 #include "SoftwareSerial/SoftwareSerial.h"
 
 // Pin 13 ist mit dem zweiten Relais verbunden. Pin 12 mit dem ersten.
-const int opto1 = 6;
-const int opto2 = 7;
-const int opto3 = 4;
-const int opto4 = 5;
+const int opto1 = 4;
+const int opto2 = 5;
+const int opto3 = 6;
+const int opto4 = 7;
 
 //Pins fuer die serielle Verbindung zum Bluetoothchip
 const int rxPin = 2; //Receive

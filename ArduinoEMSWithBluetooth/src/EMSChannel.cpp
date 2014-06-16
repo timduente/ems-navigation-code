@@ -14,6 +14,9 @@ EMSChannel::EMSChannel(uint8_t channel_to_Pads, uint8_t channel_to_Resistor,
 	increaseDecrease = false;
 	activated = false;
 
+	maxIntensity = MAX_INTENSITY;
+	minIntensity = MIN_INTENSITY;
+
 	this->channel_to_Pads = channel_to_Pads;
 	this->channel_to_Resistor = channel_to_Resistor;
 	this->poti_slave_select_pin = poti_slave_select_pin;
@@ -155,17 +158,17 @@ void EMSChannel::setIntensity(int intensity, bool increaseDecrease,
 		return;
 	}
 
-	intensity = int (127.0f * intensity / 100.0f + 0.5f);
+	intensity = int ((maxIntensity - minIntensity) * intensity / 100.0f + 0.5f) + minIntensity;
 
-	int resistorLevel = 127;
-	if (intensity > 127) {
-		this->intensity = 127;
+	int resistorLevel = MAX_INTENSITY;
+	if (intensity > MAX_INTENSITY) {
+		this->intensity = MAX_INTENSITY;
 	} else if (intensity < 0) {
 		this->intensity = 0;
 	} else {
 		this->intensity = intensity;
 	}
-	resistorLevel = 127 - this->intensity;
+	resistorLevel = MAX_INTENSITY - this->intensity;
 	if (increaseDecrease) {
 		int actPotiPosition = digitalPoti->getPosition(whiperIndex);
 		if (actPotiPosition >= resistorLevel) {
@@ -218,8 +221,19 @@ bool EMSChannel::isSignalIncreaseDecrease() {
 int EMSChannel::getIncreaseDecreaseTime() {
 	return increaseDecreaseTime;
 }
+
 void EMSChannel::setIncreaseDecreaseTime(int increaseDecreaseTime) {
 	this->increaseDecreaseTime = increaseDecreaseTime;
+}
+
+//maxIntensity in Prozent
+void EMSChannel::setMaxIntensity(int maxIntensity){
+	this->maxIntensity = int (MAX_INTENSITY * maxIntensity / 100.0f + 0.5f);
+}
+
+//minIntensity in Prozent
+void EMSChannel::setMinIntensity(int minIntensity){
+	this->minIntensity = int (MAX_INTENSITY * minIntensity / 100.0f + 0.5f);
 }
 
 //---------- private ----------------------------------------------------

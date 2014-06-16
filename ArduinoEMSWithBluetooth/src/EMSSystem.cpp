@@ -34,8 +34,8 @@ void EMSSystem::doActionCommand(String *command) {
 	Serial.flush();
 
 	int seperatorChannel = 0;
-	int seperatorStepTime = 0;
-	int seperatorSignaleLength = 0;
+	//int seperatorStepTime = 0;
+	int seperatorSignalLength = 0;
 	char c;
 	// I ist an 0ter Stelle
 	unsigned int indexOfLastSeperator = 0;
@@ -43,19 +43,19 @@ void EMSSystem::doActionCommand(String *command) {
 	for (unsigned int i = 1; i < command->length(); i++) {
 		c = command->charAt(i);
 		if (c == 'T') {
-			if (seperatorSignaleLength || (indexOfLastSeperator + 1 == i)) {
+			if (seperatorSignalLength || (indexOfLastSeperator + 1 == i)) {
 				//	Kommando fehlerhaft
 				return;
 			}
-			seperatorSignaleLength = i;
+			seperatorSignalLength = i;
 			indexOfLastSeperator = i;
-		} else if (c == 'S') {
-			if (seperatorStepTime || (indexOfLastSeperator + 1 == i)) {
-				//	Kommando fehlerhaft
-				return;
-			}
-			seperatorStepTime = i;
-			indexOfLastSeperator = i;
+//		} else if (c == 'S') {
+//			if (seperatorStepTime || (indexOfLastSeperator + 1 == i)) {
+//				//	Kommando fehlerhaft
+//				return;
+//			}
+//			seperatorStepTime = i;
+//			indexOfLastSeperator = i;
 		} else if (c == 'C') {
 			if (seperatorChannel || (indexOfLastSeperator + 1 == i)) {
 				//	Kommando fehlerhaft
@@ -70,7 +70,7 @@ void EMSSystem::doActionCommand(String *command) {
 		}
 	}
 
-	if (seperatorChannel && seperatorStepTime && seperatorSignaleLength) {
+	if (seperatorChannel /*&& seperatorStepTime*/ && seperatorSignalLength) {
 		//	Kommando syntaktisch korrekt
 		Serial.println("Kommando korrekt");
 		Serial.flush();
@@ -82,24 +82,24 @@ void EMSSystem::doActionCommand(String *command) {
 //		Serial.println(intensity);
 //		Serial.flush();
 		String channel_s = command->substring(seperatorChannel + 1,
-				seperatorStepTime);
+				/*seperatorStepTime*/ seperatorSignalLength);
 
 		int channel = channel_s.toInt();
 //		Serial.print("channel: ");
 //		Serial.println(channel);
 //		Serial.flush();
-		String stepTime_s = command->substring(seperatorStepTime + 1,
-				seperatorSignaleLength);
-		int stepTime = stepTime_s.toInt();
+//		String stepTime_s = command->substring(seperatorStepTime + 1,
+//				seperatorSignalLength);
+//		int stepTime = stepTime_s.toInt();
 
-		String signalLength_s = command->substring(seperatorSignaleLength + 1,
+		String signalLength_s = command->substring(seperatorSignalLength + 1,
 				command->length());
 		int signalLength = signalLength_s.toInt();
 //		Serial.print("Signallaenge:");
 //		Serial.println(signalLength);
 //		Serial.flush();
 
-		emsChannels[channel]->setIncreaseDecreaseTime(stepTime);
+//		emsChannels[channel]->setIncreaseDecreaseTime(stepTime);
 
 //		Serial.print("Steptime:");
 //		Serial.println(stepTime);
@@ -113,7 +113,52 @@ void EMSSystem::doActionCommand(String *command) {
 }
 
 void EMSSystem::setOption(String *option) {
+	char secChar = option->charAt(2);
+	int channel = -1;
+	int value = -1;
+	switch (option->charAt(1)){
+	case 'C':
+		if(secChar == 'T' && getChannelAndValue(option, &channel, &value)){
+			//set changeTime
+			emsChannels[channel]->setIncreaseDecreaseTime(value);
+		}
+		break;
+	case 'M':
+		if(secChar == 'A' && getChannelAndValue(option, &channel, &value)){
+			//Kalibrierung Maximalwert
+			emsChannels[channel]->setMaxIntensity(value);
+		}else if (secChar == 'I' && getChannelAndValue(option, &channel, &value)){
+			//Kalibrierung Minimalwert
+			emsChannels[channel]->setMinIntensity(value);
+		}
+		break;
 
+	default: break;
+	}
+
+}
+
+bool EMSSystem::getChannelAndValue(String *option, int *channel, int *value){
+	int left = option->indexOf('[');
+	int right = option->lastIndexOf(']');
+	int seperator = option->indexOf(',', left + 1);
+
+	if(left < seperator && seperator < right && left!= -1 && right != -1 && seperator !=-1){
+		String help = option->substring(left + 1 ,seperator);
+		(*channel) = help.toInt() ;
+		help = option->substring(seperator + 1, right);
+		(*value) = help.toInt();
+
+		//Parsen war erfolgreich
+		//Überprüfen ob es diesen Kanal ueberhaupt gibt.
+		return isInRange((*channel));
+	}
+	//Parsen war nicht erfolgreich
+	return false;
+}
+
+bool EMSSystem::isInRange(int channel){
+	return (channel >= 0 && channel < size);
 }
 
 void EMSSystem::check() {
@@ -124,9 +169,9 @@ void EMSSystem::check() {
 
 void EMSSystem::doCommand(String *command) {
 	if (command->length() > 0) {
-		if (command->charAt(0) == 'I') {
+		if (command->charAt(0) == ACTION) {
 			doActionCommand(command);
-		} else if (command->charAt(0) == 'O') {
+		} else if (command->charAt(0) == OPTION) {
 			setOption(command);
 		} else {
 			Serial.print("Unknown command: ");

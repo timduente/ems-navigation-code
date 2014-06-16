@@ -14,7 +14,12 @@
 #include "SPI/SPI.h"
 //Eine Klasse für digitale Potentiometer vom MCP
 #include "McpDigitalPot.h"
+//Einschaltzeit in ms für Photomosrelais
 #define MAX_ON_TIME_PHOTOMOS 2
+//Maximale Intensität bei 127 Stufen 127 sonst anders.
+#define MAX_INTENSITY 127
+//Minimale Intensität 0.
+#define MIN_INTENSITY 0
 
 class EMSChannel {
 
@@ -40,6 +45,9 @@ public:
 	virtual int getIncreaseDecreaseTime();
 	virtual void setIncreaseDecreaseTime(int increaseDecreaseTime);
 
+	virtual void setMaxIntensity(int maxIntensity);
+	virtual void setMinIntensity(int minIntensity);
+
 	virtual void check();
 
 
@@ -50,6 +58,9 @@ private:
 	int intensity;
 	int increaseDecreaseTime;
 	unsigned long int endTime;
+
+	int maxIntensity;
+	int minIntensity;
 
 
 	//Internes Objekt um das digitale Potentiometer anzusteuern

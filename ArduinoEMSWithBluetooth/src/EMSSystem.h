@@ -10,6 +10,9 @@
 
 #include "EMSChannel.h"
 
+#define ACTION 'I'
+#define OPTION '_'
+
 class EMSSystem {
 public:
 	EMSSystem(int channels);
@@ -26,11 +29,13 @@ public:
 protected:
 	virtual void doActionCommand(String *command);
 	virtual void setOption(String *option);
+	virtual bool getChannelAndValue(String *option, int *channel, int *value);
 
 private:
 	EMSChannel **emsChannels;
 	int channelCount;
 	int size;
+	bool isInRange(int channel);
 };
 
 #endif /* EMSSYSTEM_H_ */
