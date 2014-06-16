@@ -126,7 +126,7 @@ public class Bluetooth_Console extends Activity {
 	 */
 	public void sendThreePulses(View view) {
 		long startTime = System.currentTimeMillis();
-		CommandManager.setPulseForTime(0, 30, startTime, 3, 1000, 1000, 0);
+		CommandManager.setPulseForTime(0, 30, startTime, 3, 1000, 1000);
 		
 //		CommandToActions.setIntensityForTime(0, 50, startTime, 1000);
 //		//CommandToActions.setIntensityForTime(0, 0, startTime + 1000, 1000);
@@ -135,7 +135,7 @@ public class Bluetooth_Console extends Activity {
 //		CommandToActions.setIntensityForTime(0, 50, startTime + 4000, 1000);
 //		//CommandToActions.setIntensityForTime(0, 0, startTime + 5000, 1000);
 		
-		CommandManager.setPulseForTime(1, 127, startTime + 6000, 5, 1000, 2000, 0);
+		CommandManager.setPulseForTime(1, 127, startTime + 6000, 5, 1000, 2000);
 	}
 
 	@Override

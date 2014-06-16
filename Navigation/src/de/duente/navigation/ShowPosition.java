@@ -196,7 +196,7 @@ public class ShowPosition extends Activity {
 				CommandManager.setPulseForTime(EMS_CHANNEL_RIGHT,
 						(int) intensity[EMS_CHANNEL_RIGHT],
 						System.currentTimeMillis(),
-						(int) distanceToNextStep / 100, 1000, 1000, 0);
+						(int) distanceToNextStep / 100, 1000, 1000);
 			}
 		} else if (direction.equals(MANEUVER_LEFT)
 				|| direction.equals(MANEUVER_SLIGHT_LEFT)) {
@@ -204,7 +204,7 @@ public class ShowPosition extends Activity {
 				CommandManager.setPulseForTime(EMS_CHANNEL_LEFT,
 						(int) intensity[EMS_CHANNEL_LEFT],
 						System.currentTimeMillis(),
-						(int) distanceToNextStep / 100, 1000, 1000, 0);
+						(int) distanceToNextStep / 100, 1000, 1000);
 			}
 		}
 	}

@@ -7,60 +7,20 @@ package de.duente.navigation.actions;
  * @author Tim Dünte
  * 
  */
-public class Action implements IAction{
-	long startTimeStamp;
-
-	String command;
-	
+public class Action extends Command {
 
 	/**
-	 * Erstellt ein Aktionsobjekt. Dieses enthält die StartZeit und das
-	 * Kommando.
 	 * 
 	 * @param startTimeStamp
 	 *            Zeit zu der das Kommando ausgeführt werden soll.
-	 * @param command
-	 *            Kommando, das ausgeführt werden soll.
+	 * @param channel
+	 *            Kanal
+	 * @param intensity
+	 *            Intensität des Signals
+	 * @param onTime
+	 *            Zeit, die das Signal anstehen soll
 	 */
-	public Action(long startTimeStamp, String command) {
-		this.command = command;
-		this.startTimeStamp = startTimeStamp;
+	public Action(long startTimeStamp, int channel, int intensity, int onTime) {
+		super(startTimeStamp, "I" + intensity + "C" + channel + "T" + onTime);
 	}
-	
-
-	/**
-	 * Prüft ob das Kommando gestartet werden muss. Nimmt die Systemzeit
-	 * System.currentTimeMillis() als Referenz zum Prüfen.
-	 * 
-	 * @return true, wenn das Kommando gestartet werden muss.
-	 */
-	@Override
-	public boolean check() {
-		return System.currentTimeMillis() >= startTimeStamp;
-	}
-
-	/**
-	 * Prüft ob das Kommando gestartet werden muss.
-	 * 
-	 * @param actualTime
-	 *            aktuelle Zeit in der Zeiteinheit, die beim Erstellen übergeben
-	 *            wurde.
-	 * 
-	 * @return true, wenn das Kommando gestartet werden muss.
-	 */
-	@Override
-	public boolean check(long actualTime) {
-		return actualTime >= startTimeStamp;
-	}
-
-	/**
-	 * Gibt das Kommando dieser Aktion zurück.
-	 * 
-	 * @return Kommando
-	 */
-	@Override
-	public String getCommand() {
-		return command;
-	}
-
 }

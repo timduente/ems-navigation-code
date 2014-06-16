@@ -15,26 +15,43 @@ import de.duente.navigation.bluetooth.BluetoothConnector;
  */
 
 public class CommandManager implements Runnable {
-
 	/**
-	 * Erstellt einen Impuls auf einem bestimmten Kanal mit einer Intensitaet
-	 * und Dauer.
+	 * Setzt die Steptime fuer einen Kanal.
 	 * 
 	 * @param channel
 	 *            Kanal
-	 * @param intensity
-	 *            Intensitaet im Moment 0-127
-	 * @param time
-	 *            Dauer des Impulses in Millisekunden
+	 * 
 	 * @param stepTime
 	 *            Zeit die gewartet werden soll zwischen zwei Steps beim
 	 *            schrittweisen Incrementieren oder Decrementieren des dig.
 	 *            Potentiometers.
 	 */
-	public static void setIntensityForTime(int channel, int intensity,
-			int time, int stepTime) {
-		ActionList.addAction(new Action(System.currentTimeMillis(), "I"
-				+ intensity + "C" + channel + "S" + stepTime + "T" + time));
+	public static void setStepTimeForChannel(int channel, int stepTime) {
+
+	}
+
+	/**
+	 * Setzt die maximale Intensitaet fuer einen Kanal
+	 * 
+	 * @param channel
+	 *            Kanal
+	 * @param max
+	 *            maximale Intensitaet in Prozent 0-100
+	 */
+	public static void setMaxIntensityForChannel(int channel, int max) {
+
+	}
+
+	/**
+	 * Setzt die minimale Intensitaet fuer einen Kanal
+	 * 
+	 * @param channel
+	 *            Kanal
+	 * @param min
+	 *            minimale Intensitaet in Prozent 0-100
+	 */
+	public static void setMinIntensityForChannel(int channel, int min) {
+
 	}
 
 	/**
@@ -45,19 +62,31 @@ public class CommandManager implements Runnable {
 	 *            Kanal
 	 * @param intensity
 	 *            Intensitaet im Moment 0-127
-	 * @param time
+	 * @param onTime
+	 *            Dauer des Impulses in Millisekunden
+	 */
+	public static void setIntensityForTime(int channel, int intensity,
+			int onTime) {
+		ActionList.addAction(new Action(System.currentTimeMillis(), channel,
+				intensity, onTime));
+	}
+
+	/**
+	 * Erstellt einen Impuls auf einem bestimmten Kanal mit einer Intensitaet
+	 * und Dauer.
+	 * 
+	 * @param channel
+	 *            Kanal
+	 * @param intensity
+	 *            Intensitaet im Moment 0-127
+	 * @param onTime
 	 *            Dauer des Impulses in Millisekunden
 	 * @param startTime
 	 *            Startzeit des Impulses
-	 * @param stepTime
-	 *            Zeit die gewartet werden soll zwischen zwei Steps beim
-	 *            schrittweisen Incrementieren oder Decrementieren des dig.
-	 *            Potentiometers.
 	 */
 	public static void setIntensityForTime(int channel, int intensity,
-			long startTime, int time, int stepTime) {
-		ActionList.addAction(new Action(startTime, "I" + intensity + "C"
-				+ channel + "S" + stepTime + "T" + time));
+			long startTime, int onTime) {
+		ActionList.addAction(new Action(startTime, channel, intensity, onTime));
 	}
 
 	/**
@@ -76,18 +105,13 @@ public class CommandManager implements Runnable {
 	 *            Länge des Highsignals
 	 * @param lowTime
 	 *            Länge des Lowsignals
-	 * @param stepTime
-	 *            Zeit die gewartet werden soll zwischen zwei Steps beim
-	 *            schrittweisen Incrementieren oder Decrementieren des dig.
-	 *            Potentiometers.
 	 */
 
 	public static void setPulseForTime(int channel, int intensity,
-			long startTime, int count, long highTime, long lowTime, int stepTime) {
+			long startTime, int count, int highTime, int lowTime) {
 		for (int i = 0; i < count; i++) {
 			ActionList.addAction(new Action(startTime + i
-					* (highTime + lowTime), "I" + intensity + "C" + channel
-					+ "S" + stepTime + "T" + highTime));
+					* (highTime + lowTime), channel, intensity, highTime));
 		}
 	}
 

@@ -92,7 +92,7 @@ public class DummyApp extends Activity {
 		Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE) ;
 		vibe.vibrate(100);
 		CommandManager.setPulseForTime(0, intensity, startTime, pulse, length,
-				pulseOff, 0);
+				pulseOff);
 	}
 
 	public void sendSignalChannel1(View view) {
@@ -123,7 +123,7 @@ public class DummyApp extends Activity {
 		vibe.vibrate(100);
 
 		CommandManager.setPulseForTime(1, intensity, startTime, pulse, length,
-				pulseOff, 0);
+				pulseOff);
 	}
 
 }
