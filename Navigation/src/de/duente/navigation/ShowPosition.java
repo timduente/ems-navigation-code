@@ -118,7 +118,7 @@ public class ShowPosition extends Activity {
 
 		LocationManager lm = (LocationManager) this
 				.getSystemService(LOCATION_SERVICE);
-		lm.requestLocationUpdates("gps", 5000, // 5 Sekunden
+		lm.requestLocationUpdates("gps", 2000, // 2 Sekunden
 				1, // 1m
 				locationListener);
 		ImageView imView = (ImageView) findViewById(R.id.nextStepImage);

@@ -40,6 +40,9 @@ public class Bluetooth_Console extends Activity {
 	private BluetoothConnector bluetoothConnector;
 	private CommandManager commandManager;
 
+	private long millis;
+	private boolean checkRTT = true;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -126,16 +129,16 @@ public class Bluetooth_Console extends Activity {
 	 */
 	public void sendThreePulses(View view) {
 		long startTime = System.currentTimeMillis();
-		CommandManager.setPulseForTime(0, 30, startTime, 3, 1000, 1000);
-		
-//		CommandToActions.setIntensityForTime(0, 50, startTime, 1000);
-//		//CommandToActions.setIntensityForTime(0, 0, startTime + 1000, 1000);
-//		CommandToActions.setIntensityForTime(0, 50, startTime + 2000, 1000);
-//		//CommandToActions.setIntensityForTime(0, 0, startTime + 3000, 1000);
-//		CommandToActions.setIntensityForTime(0, 50, startTime + 4000, 1000);
-//		//CommandToActions.setIntensityForTime(0, 0, startTime + 5000, 1000);
-		
-		CommandManager.setPulseForTime(1, 127, startTime + 6000, 5, 1000, 2000);
+		millis = startTime;
+
+		if (checkRTT) {
+			CommandManager.setIntensityForTime(0, 100, 1000);
+		} else {
+			CommandManager.setPulseForTime(0, 30, startTime, 3, 1000, 1000);
+
+			CommandManager.setPulseForTime(1, 127, startTime + 6000, 5, 1000,
+					2000);
+		}
 	}
 
 	@Override
@@ -219,6 +222,11 @@ public class Bluetooth_Console extends Activity {
 				if (in != null) {
 					try {
 						int readablebytes = in.available();
+						if (checkRTT) {
+							if(in.read() == '1')
+							System.out.println("Zeit RTT = "
+									+ (System.currentTimeMillis() - millis));
+						}
 						String erg = new String();
 						for (int i = 0; i < readablebytes; i++) {
 							char c = (char) in.read();
@@ -234,7 +242,7 @@ public class Bluetooth_Console extends Activity {
 					}
 				}
 				try {
-					Thread.sleep(100);
+					Thread.sleep(10);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

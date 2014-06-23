@@ -5,7 +5,7 @@ import java.io.IOException;
 import de.duente.navigation.bluetooth.BluetoothConnector;
 
 /**
- * Die CommandManager Klasse steht verwaltet die Actions in der ActionList.
+ * Die CommandManager Klasse steht verwaltet die Commands in der ActionList.
  * Ueber statische Methoden können Aktionen hinzugefügt werden, die dann über
  * die Instanz des Kommandmangers zum richtigen Zeitpunkt an den
  * BluetoothConnector zum Senden an das Arduino weitergegeben werden.
@@ -27,7 +27,7 @@ public class CommandManager implements Runnable {
 	 *            Potentiometers.
 	 */
 	public static void setStepTimeForChannel(int channel, int stepTime) {
-
+		ActionList.addAction(new Option(System.currentTimeMillis(), Option.OPTION.SET_CHANGE_TIME, channel, stepTime ));
 	}
 
 	/**
@@ -39,7 +39,7 @@ public class CommandManager implements Runnable {
 	 *            maximale Intensitaet in Prozent 0-100
 	 */
 	public static void setMaxIntensityForChannel(int channel, int max) {
-
+		ActionList.addAction(new Option(System.currentTimeMillis(), Option.OPTION.SET_CALIBRATION_MAXIMUM, channel, max ));
 	}
 
 	/**
@@ -51,7 +51,7 @@ public class CommandManager implements Runnable {
 	 *            minimale Intensitaet in Prozent 0-100
 	 */
 	public static void setMinIntensityForChannel(int channel, int min) {
-
+		ActionList.addAction(new Option(System.currentTimeMillis(), Option.OPTION.SET_CALIBRATION_MINIMUM, channel, min ));
 	}
 
 	/**
@@ -84,6 +84,7 @@ public class CommandManager implements Runnable {
 	 * @param startTime
 	 *            Startzeit des Impulses
 	 */
+	@Deprecated
 	public static void setIntensityForTime(int channel, int intensity,
 			long startTime, int onTime) {
 		ActionList.addAction(new Action(startTime, channel, intensity, onTime));
@@ -106,7 +107,6 @@ public class CommandManager implements Runnable {
 	 * @param lowTime
 	 *            Länge des Lowsignals
 	 */
-
 	public static void setPulseForTime(int channel, int intensity,
 			long startTime, int count, int highTime, int lowTime) {
 		for (int i = 0; i < count; i++) {
@@ -162,7 +162,7 @@ public class CommandManager implements Runnable {
 	}
 
 	/**
-	 * Stopt den Thread.
+	 * Stoppt den Thread.
 	 */
 	public void stop() {
 		run = false;

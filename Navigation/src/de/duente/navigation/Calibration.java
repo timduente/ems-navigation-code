@@ -58,7 +58,7 @@ private static final float STEPS_IN_PERCENT = 4.0f;
 					shownIntensity));
 			String selectedChannel = (String) spinner.getSelectedItem();
 			CommandManager.setIntensityForTime(
-					Integer.parseInt(selectedChannel),(int) shownIntensity, 500, 0);
+					Integer.parseInt(selectedChannel),(int) shownIntensity, 500);
 
 			if (shownIntensity < 100.0f) {
 				handler.postDelayed(this, 1000);
@@ -219,7 +219,7 @@ private static final float STEPS_IN_PERCENT = 4.0f;
 		String s = (String) spinner.getSelectedItem();
 		int channel = Integer.parseInt(s);
 		CommandManager.setIntensityForTime(channel,
-				(int) calibrationSettings[channel], 1000, 0);
+				(int) calibrationSettings[channel], 1000);
 	}
 
 }
