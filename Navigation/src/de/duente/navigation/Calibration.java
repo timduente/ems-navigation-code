@@ -187,9 +187,12 @@ private static final float STEPS_IN_PERCENT = 4.0f;
 		findViewById(R.id.buttonStartCalibration).setEnabled(true);
 
 		String s = (String) spinner.getSelectedItem();
-		calibrationSettings[Integer.parseInt(s)] = shownIntensity;
+		int channelNumber = Integer.parseInt(s);
+		calibrationSettings[channelNumber] = shownIntensity;
 		textLastIntensityPercent.setText(String.format(NUMBER_FORMAT,
 				shownIntensity));
+		
+		CommandManager.setMaxIntensityForChannel(channelNumber, (int)shownIntensity);
 	}
 
 	/**
@@ -200,6 +203,10 @@ private static final float STEPS_IN_PERCENT = 4.0f;
 	 *            View von dem diese Methode aufgerufen wurde.
 	 */
 	public void startCalibration(View view) {
+		String s = (String) spinner.getSelectedItem();
+		int channelNumber = Integer.parseInt(s);
+		CommandManager.setMaxIntensityForChannel(channelNumber, 100);
+		
 		shownIntensity = 0.0f;
 		times = 0;
 		handler.postDelayed(runnable, 100);
@@ -219,7 +226,7 @@ private static final float STEPS_IN_PERCENT = 4.0f;
 		String s = (String) spinner.getSelectedItem();
 		int channel = Integer.parseInt(s);
 		CommandManager.setIntensityForTime(channel,
-				(int) calibrationSettings[channel], 1000);
+				100, 1000);
 	}
 
 }

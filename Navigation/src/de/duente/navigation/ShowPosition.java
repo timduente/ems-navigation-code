@@ -192,19 +192,34 @@ public class ShowPosition extends Activity {
 	private void updateArduino(String direction, double distanceToNextStep) {
 		if (direction.equals(MANEUVER_RIGHT)
 				|| direction.equals(MANEUVER_SLIGHT_RIGHT)) {
-			if (distanceToNextStep <= 550.0) {
-				CommandManager.setPulseForTime(EMS_CHANNEL_RIGHT,
-						(int) intensity[EMS_CHANNEL_RIGHT],
-						System.currentTimeMillis(),
-						(int) distanceToNextStep / 100, 1000, 1000);
+			
+			if (distanceToNextStep <= 100.0) {
+				CommandManager.setIntensityForTime(EMS_CHANNEL_RIGHT, 100, 1000);
+//				CommandManager.setPulseForTime(EMS_CHANNEL_RIGHT,
+//						(int) intensity[EMS_CHANNEL_RIGHT],
+//						System.currentTimeMillis(),
+//						(int) distanceToNextStep / 100, 1000, 1000);
 			}
 		} else if (direction.equals(MANEUVER_LEFT)
 				|| direction.equals(MANEUVER_SLIGHT_LEFT)) {
-			if (distanceToNextStep <= 550.0) {
-				CommandManager.setPulseForTime(EMS_CHANNEL_LEFT,
-						(int) intensity[EMS_CHANNEL_LEFT],
+			if (distanceToNextStep <= 100.0) {
+				CommandManager.setIntensityForTime(EMS_CHANNEL_LEFT, 100, 1000);
+				
+//				CommandManager.setPulseForTime(EMS_CHANNEL_LEFT,
+//						(int) intensity[EMS_CHANNEL_LEFT],
+//						System.currentTimeMillis(),
+//						(int) distanceToNextStep / 100, 1000, 1000);
+			}
+		} else if(direction.equals(MANEUVER_FINISH)){
+			if (distanceToNextStep <= 100.0) {
+				CommandManager.setPulseForTime(EMS_CHANNEL_RIGHT,
+						100,
 						System.currentTimeMillis(),
-						(int) distanceToNextStep / 100, 1000, 1000);
+						3, 1000, 1000);
+				CommandManager.setPulseForTime(EMS_CHANNEL_LEFT,
+						100,
+						System.currentTimeMillis(),
+						3, 1000, 1000);
 			}
 		}
 	}
