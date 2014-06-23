@@ -11,10 +11,10 @@
 #include "SoftwareSerial/SoftwareSerial.h"
 
 // Pin 13 ist mit dem zweiten Relais verbunden. Pin 12 mit dem ersten.
-const int opto1 = 4;
-const int opto2 = 5;
-const int opto3 = 6;
-const int opto4 = 7;
+const int opto1ToPads = 9;
+const int opto2ToResistor = 8;
+const int opto3ToPads = 5;
+const int opto4ToResistor = 4;
 
 //Pins fuer die serielle Verbindung zum Bluetoothchip
 const int rxPin = 2; //Receive
@@ -22,11 +22,11 @@ const int txPin = 3; //Transfer
 
 //Pin für den ChipSelect Port des Dig.Potis
 const int _csPoti = 10;
-const int _csPoti2 = 9;
+const int _csPoti2 = 6;
 
 SoftwareSerial bluetooth(rxPin, txPin); //Neuer Serieller Port
-EMSChannel emsChannel1(opto1, opto2, _csPoti);
-EMSChannel emsChannel2(opto3, opto4, _csPoti2);
+EMSChannel emsChannel1(opto1ToPads, opto2ToResistor, _csPoti);
+EMSChannel emsChannel2(opto3ToPads, opto4ToResistor, _csPoti2);
 EMSSystem emsSystem(2);
 
 // the setup routine runs once when you press reset:
@@ -45,13 +45,17 @@ void setup() {
 // the loop routine runs over and over again forever:
 void loop() {
 	if (bluetooth.available() > 3) {
+
 		String command = bluetooth.readStringUntil(';');
 
 		Serial.println(command);
 		Serial.flush();
 
-
+		//unsigned long timeBeforeCommand = millis();
 		emsSystem.doCommand(&command);
+
+//		Serial.print(millis() - timeBeforeCommand);
+//		Serial.flush();
 
 		//Serial.print("Kommando: ");
 
@@ -59,7 +63,7 @@ void loop() {
 		//char c = (char) bluetooth.read();
 		//Alle Daten die der Bluetoothchip sendet werden an die serielle Verbindung zum PC gesendet
 
-		//bluetooth.write(c);
+		//bluetooth.write('1');
 	}
 
 	//Überprüft ob irgendwo ein Signal beendet werden muss.
