@@ -24,5 +24,6 @@
     <string name="title_activity_dummy_app">DummyApp</string>
     <string name="title_activity_calibration">Calibration</string>
     <string name="button_text_calibration">Calibration</string>
+    <string name="title_activity_tracking_tool">TrackingTool</string>
 
 </resources>

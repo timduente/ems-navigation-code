@@ -67,15 +67,15 @@ public class GoogleNavigationAPI_JSON_Parser {
 	public Route parseJsonStringInRoute() throws JSONException {
 		Route route = new Route();
 
-		System.out.println("Status: " + jsonObj.getString(JSON_ENTRY_STATUS));
+//		System.out.println("Status: " + jsonObj.getString(JSON_ENTRY_STATUS));
 		// Status kann auf NOT_FOUND oder OK überprüft werden.
 
 		JSONArray routes = jsonObj.getJSONArray(JSON_ENTRY_ROUTES);
 		JSONObject googleRoute = (JSONObject) routes.get(0);
 		// Länge von JSON Array kann abgefragt werden.
 
-		System.out.println("CopyRights: "
-				+ googleRoute.get(JSON_ENTRY_COPYRIGHTS));
+//		System.out.println("CopyRights: "
+//				+ googleRoute.get(JSON_ENTRY_COPYRIGHTS));
 
 		JSONArray legs = googleRoute.getJSONArray(JSON_ENTRY_LEGS);
 		// Da wir nur eine Route wollen nehmen wir leg 0
@@ -88,8 +88,8 @@ public class GoogleNavigationAPI_JSON_Parser {
 
 		JSONObject startLocation = leg.getJSONObject(JSON_ENTRY_STARTLOCATION);
 		JSONObject endLocation = leg.getJSONObject(JSON_ENTRY_ENDLOCATION);
-		System.out.println("Start Location: " + startLocation.toString()
-				+ "\nEndLocation: " + endLocation.toString());
+//		System.out.println("Start Location: " + startLocation.toString()
+//				+ "\nEndLocation: " + endLocation.toString());
 		JSONArray steps = leg.getJSONArray(JSON_ENTRY_STEPS);
 
 		// text = "\nStart: " + startLocation.toString() + "\n";

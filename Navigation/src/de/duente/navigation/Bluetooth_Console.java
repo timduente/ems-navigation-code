@@ -2,9 +2,7 @@ package de.duente.navigation;
 
 import java.io.IOException;
 import java.io.InputStream;
-
 import com.example.navigation.R;
-
 import de.duente.navigation.actions.CommandManager;
 import de.duente.navigation.bluetooth.BluetoothConnector;
 import android.os.AsyncTask;
@@ -133,6 +131,7 @@ public class Bluetooth_Console extends Activity {
 
 		if (checkRTT) {
 			CommandManager.setIntensityForTime(0, 100, 1000);
+			//ActionList.addAction(new Action());
 		} else {
 			CommandManager.setPulseForTime(0, 30, startTime, 3, 1000, 1000);
 
@@ -222,15 +221,16 @@ public class Bluetooth_Console extends Activity {
 				if (in != null) {
 					try {
 						int readablebytes = in.available();
-						if (checkRTT) {
-							if(in.read() == '1')
-							System.out.println("Zeit RTT = "
-									+ (System.currentTimeMillis() - millis));
-						}
+						
 						String erg = new String();
 						for (int i = 0; i < readablebytes; i++) {
 							char c = (char) in.read();
 							erg = erg + c;
+							if (checkRTT) {
+								if(c == ';')
+								System.out.println("Zeit RTT = "
+										+ (System.currentTimeMillis() - millis));
+							}
 						}
 						if (readablebytes > 0) {
 							System.out.println("ERGEBNIS:" + erg);

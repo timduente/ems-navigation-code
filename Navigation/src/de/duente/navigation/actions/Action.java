@@ -23,4 +23,8 @@ public class Action extends Command {
 	public Action(long startTimeStamp, int channel, int intensity, int onTime) {
 		super(startTimeStamp, "I" + intensity + "C" + channel + "T" + onTime);
 	}
+	
+	public Action(){
+		super(System.currentTimeMillis(), ";");
+	}
 }

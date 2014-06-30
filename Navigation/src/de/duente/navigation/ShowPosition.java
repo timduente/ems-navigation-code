@@ -12,7 +12,6 @@ import com.example.navigation.*;
 
 import de.duente.navigation.actions.CommandManager;
 import de.duente.navigation.bluetooth.BluetoothConnector;
-import de.duente.navigation.route.GeoPoint;
 import de.duente.navigation.route.Route;
 import android.location.Location;
 import android.location.LocationListener;
@@ -30,7 +29,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class ShowPosition extends Activity {
+public class ShowPosition extends Activity implements LocationListener {
 
 	public final static String MANEUVER_FOLLOW = "follow";
 	private final static String MANEUVER_RIGHT = "turn-right";
@@ -55,61 +54,45 @@ public class ShowPosition extends Activity {
 	private BluetoothConnector bluetoothConnector;
 	private CommandManager commandManager;
 	private BluetoothAdapter adapter;
+	private int minDistanceToNavPoint = 30; //20m 
+	
+	private AlertDialog alert;
+	private Location lastLocation = null;
+	
 
-	private final LocationListener locationListener = new LocationListener() {
-		Location lastLocation = null;
-
-		@Override
-		public void onLocationChanged(Location location) {
-			TextView tView = (TextView) findViewById(R.id.textView);
-			double distance = -1.0;
-			if (route != null && route.getSize() > 0) {
-				route.updateNextWayPoint(location);
-
-				// Damit nachdem man um eine Kurve ist nicht weiterhin diese
-				// angezeigt wird.
-				if (route.getActStep().getStart()
-						.distanceTo(new GeoPoint(location)) <= 8) {
-					updateImage(route.getActStep().getText());
-				} else {
-					updateImage(MANEUVER_FOLLOW);
-				}
-
+	@Override
+	public void onLocationChanged(Location location) {
+		TextView tView = (TextView) findViewById(R.id.textView);
+		double distance = -1.0;
+		if (route != null && route.getSize() > 0) {
+			// Damit nachdem man um eine Kurve ist nicht weiterhin diese
+			// angezeigt wird.
+			if (route.getDistanceToStep(route.getActStepNumber(), location) <= minDistanceToNavPoint) {			
+				updateImage(route.getActStep().getText());
 				updateArduino(route.getActStep().getText(),
-						route.getDistanceToStep(route.getActStepNumber(),
-								location));
-				if (lastLocation != null) {
-					// Richtung berechnen aus letzer Location und location.
-					// double actDirection = GeoPoint.calculateAngle(from, to);
-
-				}
-				distance = route.getDistanceToStep(route.getActStepNumber(),
-						location);
+					route.getDistanceToStep(route.getActStepNumber(), location));
+			} else {
+				updateImage(MANEUVER_FOLLOW);
 			}
+			route.updateNextWayPoint(location);
 
-			tView.setText("Latitude: " + location.getLatitude()
-					+ "\nLongitude: " + location.getLongitude() + "\nAbstand: "
-					+ String.format("%.2fm", distance));
-			lastLocation = location;
+			
+//			if (lastLocation != null) {
+//				// Richtung berechnen aus letzer Location und location.
+//				// double actDirection = GeoPoint.calculateAngle(from, to);
+//
+//			}
+			distance = route.getDistanceToStep(route.getActStepNumber(),
+					location);
 		}
 
-		@Override
-		public void onProviderDisabled(String arg0) {
-			// not used
-		}
-
-		@Override
-		public void onProviderEnabled(String arg0) {
-			// not used
-		}
-
-		@Override
-		public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
-			// not used
-		}
-	};
-
-	AlertDialog alert;
+		//Debug Ausgabe
+		tView.setText("Latitude: " + location.getLatitude() + "\nLongitude: "
+				+ location.getLongitude() + "\nAbstand: "
+				+ String.format("%.2fm", distance) + "\nGenauigkeit: "+ location.getAccuracy() + "m");
+		
+		lastLocation = location;
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -118,9 +101,9 @@ public class ShowPosition extends Activity {
 
 		LocationManager lm = (LocationManager) this
 				.getSystemService(LOCATION_SERVICE);
-		lm.requestLocationUpdates("gps", 2000, // 2 Sekunden
+		lm.requestLocationUpdates("gps", 500, // 0,5 Sekunden
 				1, // 1m
-				locationListener);
+				this);
 		ImageView imView = (ImageView) findViewById(R.id.nextStepImage);
 		imView.setVisibility(ImageView.INVISIBLE);
 
@@ -175,7 +158,6 @@ public class ShowPosition extends Activity {
 				});
 		alert = builder.create();
 		new BluetoothConnection().execute(bluetoothConnector);
-
 	}
 
 	public void connectBluetooth(View view) {
@@ -192,36 +174,19 @@ public class ShowPosition extends Activity {
 	private void updateArduino(String direction, double distanceToNextStep) {
 		if (direction.equals(MANEUVER_RIGHT)
 				|| direction.equals(MANEUVER_SLIGHT_RIGHT)) {
+				CommandManager
+						.setIntensityForTime(EMS_CHANNEL_RIGHT, 100, 1000);
 			
-			if (distanceToNextStep <= 100.0) {
-				CommandManager.setIntensityForTime(EMS_CHANNEL_RIGHT, 100, 1000);
-//				CommandManager.setPulseForTime(EMS_CHANNEL_RIGHT,
-//						(int) intensity[EMS_CHANNEL_RIGHT],
-//						System.currentTimeMillis(),
-//						(int) distanceToNextStep / 100, 1000, 1000);
-			}
 		} else if (direction.equals(MANEUVER_LEFT)
-				|| direction.equals(MANEUVER_SLIGHT_LEFT)) {
-			if (distanceToNextStep <= 100.0) {
+				|| direction.equals(MANEUVER_SLIGHT_LEFT)) {		
 				CommandManager.setIntensityForTime(EMS_CHANNEL_LEFT, 100, 1000);
-				
-//				CommandManager.setPulseForTime(EMS_CHANNEL_LEFT,
-//						(int) intensity[EMS_CHANNEL_LEFT],
-//						System.currentTimeMillis(),
-//						(int) distanceToNextStep / 100, 1000, 1000);
+
+		} else if (direction.equals(MANEUVER_FINISH)) {
+				CommandManager.setPulseForTime(EMS_CHANNEL_RIGHT, 100,
+						System.currentTimeMillis(), 3, 1000, 1000);
+				CommandManager.setPulseForTime(EMS_CHANNEL_LEFT, 100,
+						System.currentTimeMillis(), 3, 1000, 1000);
 			}
-		} else if(direction.equals(MANEUVER_FINISH)){
-			if (distanceToNextStep <= 100.0) {
-				CommandManager.setPulseForTime(EMS_CHANNEL_RIGHT,
-						100,
-						System.currentTimeMillis(),
-						3, 1000, 1000);
-				CommandManager.setPulseForTime(EMS_CHANNEL_LEFT,
-						100,
-						System.currentTimeMillis(),
-						3, 1000, 1000);
-			}
-		}
 	}
 
 	private void updateImage(String direction) {
@@ -237,9 +202,9 @@ public class ShowPosition extends Activity {
 			imView.setImageResource(R.drawable.slight_left);
 		} else if (direction.equals(MANEUVER_SLIGHT_RIGHT)) {
 			imView.setImageResource(R.drawable.slight_right);
-		} else if(direction.equals(MANEUVER_FINISH)) {
+		} else if (direction.equals(MANEUVER_FINISH)) {
 			imView.setImageResource(R.drawable.finish);
-		}else{
+		} else {
 			imView.setVisibility(ImageView.INVISIBLE);
 		}
 
@@ -255,17 +220,15 @@ public class ShowPosition extends Activity {
 				location.setLongitude(route
 						.getStep(route.getActStepNumber() + 1).getStart()
 						.getLongitude());
-			}else{
-				location.setLatitude(route
-						.getStep(route.getActStepNumber()).getStart()
-						.getLatitude());
-				location.setLongitude(route
-						.getStep(route.getActStepNumber()).getStart()
-						.getLongitude());
+			} else {
+				location.setLatitude(route.getStep(route.getActStepNumber())
+						.getStart().getLatitude());
+				location.setLongitude(route.getStep(route.getActStepNumber())
+						.getStart().getLongitude());
 			}
 			// if (route.getActWayPoint() < route.getSize() - 1)
 			// route.setActWayPoint(route.getActWayPoint() + 1);
-			locationListener.onLocationChanged(location);
+			onLocationChanged(location);
 
 		}
 	}
@@ -317,7 +280,7 @@ public class ShowPosition extends Activity {
 
 			intensity = data.getFloatArrayExtra(Calibration.CALIBRATION_VALUES);
 		}
-	}
+	}	
 
 	/**
 	 * Stellt eine Verbindung zum Arduino her. Der Verbindungsaufbau kann lange
@@ -392,7 +355,7 @@ public class ShowPosition extends Activity {
 			urlToBuild.append(URL_END);
 
 			try {
-				System.out.println(urlToBuild.toString());
+				//System.out.println(urlToBuild.toString());
 				url = new URL(urlToBuild.toString());
 				BufferedReader in = new BufferedReader(new InputStreamReader(
 						url.openStream()));
@@ -429,12 +392,28 @@ public class ShowPosition extends Activity {
 				start.setText(route.getStartLocation());
 				end.setText(route.getEndLocation());
 
-				route.printMe();
+				//route.printMe();
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			// tView.setText(text);
 		}
+	}
+	
+	//Nicht benutzte Methoden
+	@Override
+	public void onProviderDisabled(String arg0) {
+		// not used
+	}
+
+	@Override
+	public void onProviderEnabled(String arg0) {
+		// not used
+	}
+
+	@Override
+	public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
+		// not used
 	}
 }

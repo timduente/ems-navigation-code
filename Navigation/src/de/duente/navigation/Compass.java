@@ -28,6 +28,7 @@ public class Compass extends Activity {
 	float[] geomagnetic = new float[3];
 	float[] rotationMatrix = new float[9];
 	float[] inclinationMatrix = new float[9];
+	float[] backOfSmartphoneCalc = new float[3];
 	private final float[] mRotationMatrix = new float[9];
 	private final float[] orhtProjection = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
 			0.0f, 0.0f, 0.0f, 0.0f };
@@ -37,6 +38,8 @@ public class Compass extends Activity {
 	GeoPoint to = new GeoPoint();
 
 	float[] orientation = new float[3];
+	
+	float winkel = 0.0f;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -176,6 +179,14 @@ public class Compass extends Activity {
 				//float[] values = new float[3];
 				SensorManager.getRotationMatrix(rotationMatrix,
 						inclinationMatrix, gravity, geomagnetic);
+				
+				float[] backOfSmartphone = {0.0f, 0.0f, 1.0f};
+
+				
+				Compass.multMatrixVector(rotationMatrix, backOfSmartphone, backOfSmartphoneCalc);
+				
+				System.out.println("Rotation von (0,0,1) = ("+backOfSmartphoneCalc[0] + "," + backOfSmartphoneCalc[1] + ","+ backOfSmartphoneCalc[2]+")");
+				
 				SensorManager.getOrientation(rotationMatrix, orientation);
 
 				//
@@ -225,7 +236,7 @@ public class Compass extends Activity {
 
 	}
 
-	private void multMatrixVector(float[] matrix, float[] vector, float[] values) {
+	public static void multMatrixVector(float[] matrix, float[] vector, float[] values) {
 		if (matrix.length == 9 && vector.length == 3 && values.length == 3) {
 			for (int i = 0; i < 3; i++) {
 				for (int j = 0; j < 3; j++) {

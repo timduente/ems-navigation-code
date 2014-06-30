@@ -36,9 +36,10 @@ public class GeoPoint {
 		this.longitude = location.getLongitude();
 	}
 
-	public double distanceTo(GeoPoint geoPoint) {
-		return 0.0;
-	}
+	
+//	public double distanceTo(GeoPoint geoPoint) {
+//		return 0.0;
+//	}
 
 	@Override
 	public String toString() {

@@ -28,7 +28,7 @@ public class ActionList {
 	 *            IAction, die hinzugefügt werden soll.
 	 */
 	public static void addAction(Command action) {
-		System.out.println("added");
+//		System.out.println("added");
 		actionList.add(action);
 	}
 
