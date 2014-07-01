@@ -48,7 +48,7 @@ public:
 	virtual void setMaxIntensity(int maxIntensity);
 	virtual void setMinIntensity(int minIntensity);
 
-	virtual void check();
+	virtual int check();
 
 
 private:

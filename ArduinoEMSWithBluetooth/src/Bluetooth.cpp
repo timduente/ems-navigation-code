@@ -48,8 +48,8 @@ void loop() {
 
 		String command = bluetooth.readStringUntil(';');
 
-		Serial.println(command);
-		Serial.flush();
+//		Serial.println(command);
+//		Serial.flush();
 
 		//unsigned long timeBeforeCommand = millis();
 		emsSystem.doCommand(&command);
@@ -62,12 +62,15 @@ void loop() {
 
 		//char c = (char) bluetooth.read();
 		//Alle Daten die der Bluetoothchip sendet werden an die serielle Verbindung zum PC gesendet
+		//bluetooth.print(command);
 
-		//bluetooth.write('1');
+//		bluetooth.write(';');
 	}
 
 	//Überprüft ob irgendwo ein Signal beendet werden muss.
-	emsSystem.check();
+	if(emsSystem.check() > 0){
+		bluetooth.print("STOP;");
+	}
 
 	if (Serial.available()) {
 		char c = (char) Serial.read();

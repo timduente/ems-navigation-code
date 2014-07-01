@@ -30,8 +30,8 @@ void EMSSystem::doActionCommand(String *command) {
 //	Es sind nur die Zeichen T, S, C und 0-9 erlaubt. Wenn das Format verletzt wird, wird das Kommando nicht ausgeführt.
 //	Es muss mindestens ein Zeichen zwischen den Trennzeichen liegen.
 
-	Serial.println("Action Kommand");
-	Serial.flush();
+//	Serial.println("Action Kommand");
+//	Serial.flush();
 
 	int seperatorChannel = 0;
 	//int seperatorStepTime = 0;
@@ -72,8 +72,8 @@ void EMSSystem::doActionCommand(String *command) {
 
 	if (seperatorChannel /*&& seperatorStepTime*/ && seperatorSignalLength) {
 		//	Kommando syntaktisch korrekt
-		Serial.println("Kommando korrekt");
-		Serial.flush();
+//		Serial.println("Kommando korrekt");
+//		Serial.flush();
 
 		String intensity_s = command->substring(1, seperatorChannel);
 
@@ -161,10 +161,12 @@ bool EMSSystem::isInRange(int channel){
 	return (channel >= 0 && channel < size);
 }
 
-void EMSSystem::check() {
+int EMSSystem::check() {
+	int stopCount = 0;
 	for (int i = 0; i < size; i++) {
-		emsChannels[i]->check();
+		stopCount = stopCount + emsChannels[i]->check();
 	}
+	return stopCount;
 }
 
 void EMSSystem::doCommand(String *command) {

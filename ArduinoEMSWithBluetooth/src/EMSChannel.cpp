@@ -181,9 +181,9 @@ void EMSChannel::setIntensity(int intensity, bool increaseDecrease,
 	} else {
 		digitalPoti->setPosition(whiperIndex, intensity);
 	}
-	Serial.print("Stufe des dig. Potis: ");
-	Serial.println(digitalPoti->getPosition(whiperIndex));
-	Serial.flush();
+//	Serial.print("Stufe des dig. Potis: ");
+//	Serial.println(digitalPoti->getPosition(whiperIndex));
+//	Serial.flush();
 	endTime = millis() + time;
 }
 
@@ -203,12 +203,14 @@ void EMSChannel::setSignalIncreaseDecrease(bool increaseDecreaseOn) {
 	increaseDecrease = increaseDecreaseOn;
 }
 
-void EMSChannel::check() {
+int EMSChannel::check() {
 	if (endTime && endTime <= millis()) {
 		setIntensity(0);
 		deactivate();
 		endTime = 0;
+		return 1;
 	}
+	return 0;
 }
 
 /* Gibt zurück, ob das Signal anteigt und abfällt oder ob es schlagartig geschaltet wird. An und Absteigend ist default und wesentlich angenehmer.

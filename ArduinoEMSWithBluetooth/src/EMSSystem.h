@@ -20,7 +20,7 @@ public:
 
 	virtual void addChannelToSystem(EMSChannel *emsChannel);
 	virtual void doCommand(String *command);
-	virtual void check();
+	virtual int check();
 
 
 	static void start();
