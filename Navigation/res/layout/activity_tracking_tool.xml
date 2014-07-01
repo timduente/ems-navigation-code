@@ -24,6 +24,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/startTracking"
+        android:enabled="false"
         android:onClick="startSignal"
         android:text="Signal an"
         android:textAppearance="?android:attr/textAppearanceLargeInverse" />
