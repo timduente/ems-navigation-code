@@ -90,12 +90,15 @@ public class BluetoothConnector {
 				// versendet werden. So hoffe ich den Buffer nicht zu überfüllen
 				// vom Arduino
 				byte[] sendbytes = text.getBytes();
-				for (int i = 0; i < sendbytes.length; i++) {
-					// System.out.println(sendbytes[i] + "");
-					// System.out.printf("b", sendbytes[i]);
-					out.write(sendbytes[i]);
-					out.flush();
-				}
+				out.write(sendbytes);
+				out.flush();
+//				for (int i = 0; i < sendbytes.length; i++) {
+//					// System.out.println(sendbytes[i] + "");
+//					// System.out.printf("b", sendbytes[i]);
+//					out.write(sendbytes[i]);
+//					out.flush();
+//				}
+				
 				// System.out.println("Länge: " + sendbytes.length);
 				// out.write(text.getText().toString().getBytes());
 				//System.out.println(text);

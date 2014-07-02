@@ -153,8 +153,6 @@ public class TrackingTool extends Activity {
 			e.printStackTrace();
 		}
 		new Thread(commandManager).start();
-		updateView();
-		changeFile();
 	}
 
 	private void updateView() {
@@ -203,6 +201,10 @@ public class TrackingTool extends Activity {
 		}
 	}
 
+	/** Startet die Trackingaufnahme. Alle Positionsdaten werden getrackt.
+	 * 
+	 * @param view View von dem diese Methode aufgerufen wird.
+	 */
 	public void startTracking(View view) {
 		trackView.clear();
 		trackingEnabled = true;
@@ -212,6 +214,10 @@ public class TrackingTool extends Activity {
 		}
 	}
 
+	/** Startet das EMS-Signal. Dieses wird übertragen. Darf erst nach dem Starten des Trackings aufgerufen werden.
+	 * 
+	 * @param view View von dem diese Methode aufgerufen wird.
+	 */
 	public void startSignal(View view) {
 		signalStarted = 1;
 		CommandManager.setIntensityForTime(levels.get(counter).channel,
@@ -219,11 +225,16 @@ public class TrackingTool extends Activity {
 		findViewById(R.id.startSignal).setEnabled(false);
 	}
 
-	public void stopSignal() {
+
+	private void stopSignal() {
 		signalStarted = 0;
 		updateView();
 	}
 
+	/**Beendet das Tracking
+	 * 
+	 * @param view View Objekt, dass diese Methode aufruft.
+	 */
 	public void stopTracking(View view) {
 		trackingEnabled = false;
 		counter++;
@@ -329,7 +340,7 @@ public class TrackingTool extends Activity {
 
 	/**
 	 * Empfängt die UDP-Pakete in denen sich die Tracking Informationen
-	 * befinden.
+	 * befinden. Fragt nach dem Empfangen die Zeit beim Zeitserver nach.
 	 * 
 	 * @author Tim Dünte
 	 * 
