@@ -17,38 +17,15 @@
         android:layout_alignParentRight="true"
         android:text="ooo" />
 
-    <Button
-        android:id="@+id/startSignal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/startTracking"
-        android:enabled="false"
-        android:onClick="startSignal"
-        android:text="Signal an"
-        android:textAppearance="?android:attr/textAppearanceLargeInverse" />
-
     <TextView
         android:id="@+id/courseID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/textView2"
         android:layout_alignBottom="@+id/textView2"
-        android:layout_alignParentRight="true"
+        android:layout_toLeftOf="@+id/button1"
         android:layout_toRightOf="@+id/textView2"
         android:textAppearance="?android:attr/textAppearanceLarge" />
-
-    <Button
-        android:id="@+id/startTracking"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/textView2"
-        android:layout_marginTop="22dp"
-        android:onClick="startTracking"
-        android:text="Tracking Start"
-        android:textAppearance="?android:attr/textAppearanceLargeInverse" />
 
     <Spinner
         android:id="@+id/spinnerParticipants"
@@ -96,5 +73,66 @@
         android:onClick="stopTracking"
         android:text="Stop!"
         android:textAppearance="?android:attr/textAppearanceLargeInverse" />
+
+    <TextView
+        android:id="@+id/textRight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/textLeft"
+        android:layout_alignBottom="@+id/textLeft"
+        android:layout_alignRight="@+id/button1"
+        android:text="Rechts"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textSize="40sp" />
+
+    <Button
+        android:id="@+id/startSignal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textLeft"
+        android:layout_centerVertical="true"
+        android:enabled="false"
+        android:onClick="startSignal"
+        android:text="Signal an"
+        android:textAppearance="?android:attr/textAppearanceLargeInverse" />
+
+    <TextView
+        android:id="@+id/textLeft"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/startSignal"
+        android:layout_alignLeft="@+id/startTracking"
+        android:text="Links"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textSize="40sp" />
+
+    <Button
+        android:id="@+id/startTracking"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/trackingView1"
+        android:layout_below="@+id/courseID"
+        android:onClick="startTracking"
+        android:text="Tracking Start"
+        android:textAppearance="?android:attr/textAppearanceLargeInverse" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/button1"
+        android:layout_alignLeft="@+id/textRight"
+        android:text="Count"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/textCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/textView4"
+        android:layout_alignBottom="@+id/textView4"
+        android:layout_alignRight="@+id/button1"
+        android:layout_toRightOf="@+id/textView4"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
 
 </RelativeLayout>

@@ -41,7 +41,7 @@
         android:layout_alignRight="@+id/b0_84"
         android:layout_below="@+id/textChannel"
         android:onClick="sendSignalChannel0"
-        android:text="42" />
+        android:text="33%" />
 
     <Button
         android:id="@+id/b0_84"
@@ -51,7 +51,7 @@
         android:layout_alignRight="@+id/b0_127"
         android:layout_below="@+id/b0_42"
         android:onClick="sendSignalChannel0"
-        android:text="84" />
+        android:text="66%" />
 
     <Button
         android:id="@+id/b1_84"
@@ -60,7 +60,7 @@
         android:layout_alignRight="@+id/textView2"
         android:layout_below="@+id/b1_42"
         android:onClick="sendSignalChannel1"
-        android:text="84" />
+        android:text="66%" />
 
     <Button
         android:id="@+id/b1_127"
@@ -70,7 +70,7 @@
         android:layout_alignRight="@+id/textView2"
         android:layout_below="@+id/b1_84"
         android:onClick="sendSignalChannel1"
-        android:text="127" />
+        android:text="100%" />
 
     <Button
         android:id="@+id/b1_42"
@@ -79,7 +79,7 @@
         android:layout_alignRight="@+id/textView2"
         android:layout_below="@+id/textView2"
         android:onClick="sendSignalChannel1"
-        android:text="42" />
+        android:text="33%" />
 
     <TextView
         android:id="@+id/courseID"
@@ -102,7 +102,7 @@
         android:text="1" />
 
     <TextView
-        android:id="@+id/textView4"
+        android:id="@+id/textLeft"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
@@ -111,11 +111,11 @@
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
-        android:id="@+id/textView5"
+        android:id="@+id/textRight"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/pulsLength"
-        android:layout_alignRight="@+id/textView4"
+        android:layout_alignRight="@+id/textLeft"
         android:text="ms"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
@@ -123,8 +123,8 @@
         android:id="@+id/textView6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/textView4"
-        android:layout_below="@+id/textView4"
+        android:layout_alignLeft="@+id/textLeft"
+        android:layout_below="@+id/textLeft"
         android:text="HIGH:"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
@@ -134,7 +134,7 @@
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/textView6"
         android:layout_alignBottom="@+id/textView6"
-        android:layout_toLeftOf="@+id/textView5"
+        android:layout_toLeftOf="@+id/textRight"
         android:layout_toRightOf="@+id/textView6"
         android:ems="10"
         android:inputType="number"
@@ -147,7 +147,7 @@
         android:layout_alignBaseline="@+id/textView7"
         android:layout_alignBottom="@+id/textView7"
         android:layout_alignLeft="@+id/pulsLength"
-        android:layout_toLeftOf="@+id/textView5"
+        android:layout_toLeftOf="@+id/textRight"
         android:ems="10"
         android:inputType="number"
         android:text="1000" />
@@ -178,7 +178,7 @@
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/b0_84"
         android:onClick="sendSignalChannel0"
-        android:text="127" />
+        android:text="100%" />
 
 </RelativeLayout>
 </ScrollView>

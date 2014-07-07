@@ -9,9 +9,14 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
+
 import com.example.navigation.R;
+
 import de.duente.navigation.actions.CommandManager;
 import de.duente.navigation.bluetooth.BluetoothConnector;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -44,6 +49,9 @@ public class TrackingTool extends Activity {
 	private Spinner spinner;
 	private TrackingView trackView;
 	private TextView courseID;
+	private TextView textLeft;
+	private TextView textRight;
+	private TextView textCounter;
 
 	private final static int ITERATION_COUNT = 5;
 	private final static int DIFFERENT_LEVEL_COUNT = 7;
@@ -66,6 +74,24 @@ public class TrackingTool extends Activity {
 		@Override
 		public void run() {
 			stopTracking(null);
+		}
+	};
+
+	Handler soundHandler = new Handler();
+	private Runnable soundRunnable = new Runnable() {
+		@Override
+		public void run() {
+			try {
+				Uri notification = RingtoneManager
+						.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+				Ringtone r = RingtoneManager.getRingtone(
+						getApplicationContext(), notification);
+				r.play();
+				Thread.sleep(1200);
+				r.stop();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	};
 
@@ -111,6 +137,9 @@ public class TrackingTool extends Activity {
 
 		trackView = (TrackingView) findViewById(R.id.trackingView1);
 		courseID = (TextView) findViewById(R.id.courseID);
+		textLeft = (TextView) findViewById(R.id.textLeft);
+		textRight = (TextView) findViewById(R.id.textRight);
+		textCounter = (TextView) findViewById(R.id.textCount);
 
 		// Tracking Informationsempfaenger starten
 		new UDPReceiver().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
@@ -156,7 +185,17 @@ public class TrackingTool extends Activity {
 	}
 
 	private void updateView() {
+		textCounter.setText("" +counter);
 		courseID.setText(levels.get(counter).toString());
+		if (levels.get(counter).channel == 0) {
+			textLeft.setVisibility(TextView.VISIBLE);
+			textRight.setVisibility(TextView.INVISIBLE);
+		} else {
+			textLeft.setVisibility(TextView.INVISIBLE);
+			textRight.setVisibility(TextView.VISIBLE);
+		}
+		
+		
 	}
 
 	@Override
@@ -185,27 +224,31 @@ public class TrackingTool extends Activity {
 		file = new File(pathToLogs, spinner.getSelectedItem().toString()
 				+ ".csv");
 
-		if (!file.exists()||file.length() <= FILE_HEADER.length()) {
+		if (!file.exists() || file.length() <= FILE_HEADER.length()) {
 			try {
 				fileWriter = new FileWriter(file);
-				fileWriter
-						.append(FILE_HEADER);
+				fileWriter.append(FILE_HEADER);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		} else {
-			if(spinner.getSelectedItemPosition() < state.length ){
+			if (spinner.getSelectedItemPosition() < state.length) {
 				spinner.setSelection(spinner.getSelectedItemPosition() + 1);
 			}
 		}
 	}
 
-	/** Startet die Trackingaufnahme. Alle Positionsdaten werden getrackt.
+	/**
+	 * Startet die Trackingaufnahme. Alle Positionsdaten werden getrackt.
 	 * 
-	 * @param view View von dem diese Methode aufgerufen wird.
+	 * @param view
+	 *            View von dem diese Methode aufgerufen wird.
 	 */
 	public void startTracking(View view) {
+		if (counter >= levels.size()) {
+			return;
+		}
 		trackView.clear();
 		trackingEnabled = true;
 		view.setEnabled(false);
@@ -214,31 +257,37 @@ public class TrackingTool extends Activity {
 		}
 	}
 
-	/** Startet das EMS-Signal. Dieses wird übertragen. Darf erst nach dem Starten des Trackings aufgerufen werden.
+	/**
+	 * Startet das EMS-Signal. Dieses wird übertragen. Darf erst nach dem
+	 * Starten des Trackings aufgerufen werden.
 	 * 
-	 * @param view View von dem diese Methode aufgerufen wird.
+	 * @param view
+	 *            View von dem diese Methode aufgerufen wird.
 	 */
 	public void startSignal(View view) {
 		signalStarted = 1;
+
 		CommandManager.setIntensityForTime(levels.get(counter).channel,
 				levels.get(counter).intensity, TIME_SIGNAL);
 		findViewById(R.id.startSignal).setEnabled(false);
 	}
-
 
 	private void stopSignal() {
 		signalStarted = 0;
 		updateView();
 	}
 
-	/**Beendet das Tracking
+	/**
+	 * Beendet das Tracking
 	 * 
-	 * @param view View Objekt, dass diese Methode aufruft.
+	 * @param view
+	 *            View Objekt, dass diese Methode aufruft.
 	 */
 	public void stopTracking(View view) {
 		trackingEnabled = false;
 		counter++;
 		findViewById(R.id.startTracking).setEnabled(true);
+		this.updateView();
 
 		try {
 			if (fileWriter != null) {
@@ -247,6 +296,9 @@ public class TrackingTool extends Activity {
 		} catch (IOException ioEx) {
 			// TODO: Auto Catch
 			ioEx.printStackTrace();
+		}
+		if (counter >= levels.size()) {
+			soundHandler.post(soundRunnable);
 		}
 	}
 
@@ -399,12 +451,14 @@ public class TrackingTool extends Activity {
 				String[] values = progress[0].split(";");
 				try {
 					fileWriter.append(spinner.getSelectedItem().toString()
-							+ ";" + counter + ";" + levels.get(counter) + ";" + progress[0]
-							+ progress[1] + "" + signalStarted + ";\n");
+							+ ";" + counter + ";" + levels.get(counter) + ";"
+							+ progress[0] + progress[1] + "" + signalStarted
+							+ ";\n");
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				trackView.setSignalActive(signalStarted == 1);
 				trackView.setCoordinateToDraw(Float.parseFloat(values[0]),
 						Float.parseFloat(values[1]),
 						Float.parseFloat(values[2]));

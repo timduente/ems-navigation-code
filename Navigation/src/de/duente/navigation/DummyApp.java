@@ -80,13 +80,13 @@ public class DummyApp extends Activity {
 		switch (view.getId()) {
 
 		case R.id.b0_42:
-			intensity = 42;
+			intensity = 33;
 			break;
 		case R.id.b0_84:
-			intensity = 84;
+			intensity = 66;
 			break;
 		case R.id.b0_127:
-			intensity = 127;
+			intensity = 100;
 			break;
 		}
 		Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE) ;
@@ -110,13 +110,13 @@ public class DummyApp extends Activity {
 		switch (view.getId()) {
 
 		case R.id.b1_42:
-			intensity = 42;
+			intensity = 33;
 			break;
 		case R.id.b1_84:
-			intensity = 84;
+			intensity = 66;
 			break;
 		case R.id.b1_127:
-			intensity = 127;
+			intensity = 100;
 			break;
 		}
 		Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE) ;

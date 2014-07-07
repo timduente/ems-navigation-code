@@ -20,6 +20,22 @@ public class TrackingView extends View {
 
 	private int x = 0;
 	private int y = 0;
+	
+	private boolean signalActive = false;
+
+	/**
+	 * @return the signalActive
+	 */
+	public boolean isSignalActive() {
+		return signalActive;
+	}
+
+	/**
+	 * @param signalActive the signalActive to set
+	 */
+	public void setSignalActive(boolean signalActive) {
+		this.signalActive = signalActive;
+	}
 
 	private boolean drawMe = false;
 
@@ -49,9 +65,14 @@ public class TrackingView extends View {
 	 */
 	public void setCoordinateToDraw(float x, float y, float z) {
 		if (x != 0.0f && y != 0.0f && z != 0.0f) {
-			this.x = (int) (x * 40.0f) + getWidth() / 2;
-			this.y = (int) (z * 40.0f) + getHeight() / 2;		
-			img.setPixel(this.x, this.y, Color.BLACK);		
+			this.x = (int) ((x * 40.0f) + getWidth() / 1.5f);
+			this.y = (int) (z * 40.0f) + getHeight() / 8;	
+			if(signalActive){
+				img.setPixel(this.x, this.y, Color.RED);	
+			}else{
+				img.setPixel(this.x, this.y, Color.BLACK);
+			}
+					
 			drawMe = true;
 			this.invalidate();
 		}

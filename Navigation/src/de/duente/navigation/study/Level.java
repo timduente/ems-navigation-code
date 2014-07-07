@@ -7,7 +7,7 @@ public class Level implements Comparable<Level>{
 	
 	public Level(int id){
 		this.id = id - 3;
-		channel = id < 0 ? 0 : 1;
+		channel = this.id < 0 ? 0 : 1;
 		intensity = Math.abs(this.id) / 3 * 100;
 	}
 	
