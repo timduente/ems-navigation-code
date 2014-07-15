@@ -92,12 +92,6 @@ public class BluetoothConnector {
 				byte[] sendbytes = text.getBytes();
 				out.write(sendbytes);
 				out.flush();
-//				for (int i = 0; i < sendbytes.length; i++) {
-//					// System.out.println(sendbytes[i] + "");
-//					// System.out.printf("b", sendbytes[i]);
-//					out.write(sendbytes[i]);
-//					out.flush();
-//				}
 				
 				// System.out.println("Länge: " + sendbytes.length);
 				// out.write(text.getText().toString().getBytes());

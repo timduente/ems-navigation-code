@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketTimeoutException;
 
 /**
  * {@hide}
@@ -122,7 +123,12 @@ public class SntpClient
             mRoundTripTime = roundTripTime;
         } catch (IOException e) {
             //if (Config.LOGD) Log.d(TAG, "request time failed: " + e);
-            e.printStackTrace();
+        	
+            //e.printStackTrace();
+        	if(e instanceof SocketTimeoutException)
+        	System.err.println("Socket Timeout");
+        	else
+        		e.printStackTrace();
             return false;
         }
 

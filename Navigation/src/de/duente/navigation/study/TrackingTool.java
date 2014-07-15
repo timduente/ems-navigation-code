@@ -414,7 +414,7 @@ public class TrackingTool extends Activity {
 			SntpClient client = new SntpClient();
 			CharSequence deviceTime;
 			String values;
-			byte[] buffer = new byte[1000];
+			byte[] buffer = new byte[96];
 			DatagramPacket packet;
 			while (run) {
 				try {
@@ -427,7 +427,7 @@ public class TrackingTool extends Activity {
 					e.printStackTrace();
 				}
 				deviceTime = "##TIMEOUT##;";
-				if (client.requestTime("192.168.3.9", 500)) {
+				if (client.requestTime("192.168.3.9", 200)) {
 					long now = client.getNtpTime()
 							+ SystemClock.elapsedRealtime()
 							- client.getNtpTimeReference();

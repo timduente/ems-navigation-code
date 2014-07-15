@@ -14,6 +14,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.view.Menu;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 
 public class DummyApp extends Activity {
@@ -25,6 +26,8 @@ public class DummyApp extends Activity {
 
 	private BluetoothConnector bluetoothConnector;
 	private CommandManager commandManager;
+
+	private CheckBox expValues;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +48,8 @@ public class DummyApp extends Activity {
 					BluetoothAdapter.ACTION_REQUEST_ENABLE);
 			startActivityForResult(enableBluetooth, REQUEST_ENABLE_BT);
 		}
+
+		expValues = (CheckBox) findViewById(R.id.checkBox1);
 
 		bluetoothConnector = new BluetoothConnector(mac, adapter);
 		commandManager = new CommandManager(bluetoothConnector);
@@ -77,19 +82,27 @@ public class DummyApp extends Activity {
 		int pulse = Integer.parseInt(eT.getText().toString());
 		int intensity = 0;
 
+		boolean exp = expValues.isChecked();
+
 		switch (view.getId()) {
 
 		case R.id.b0_42:
-			intensity = 33;
+			if (!exp)
+				intensity = 33;
+			else
+				intensity = 11;
 			break;
 		case R.id.b0_84:
-			intensity = 66;
+			if (!exp)
+				intensity = 66;
+			else
+				intensity = 33;
 			break;
 		case R.id.b0_127:
 			intensity = 100;
 			break;
 		}
-		Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE) ;
+		Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 		vibe.vibrate(100);
 		CommandManager.setPulseForTime(0, intensity, startTime, pulse, length,
 				pulseOff);
@@ -106,20 +119,27 @@ public class DummyApp extends Activity {
 		int length = Integer.parseInt(eT2.getText().toString());
 		int pulse = Integer.parseInt(eT.getText().toString());
 		int intensity = 0;
-		
+		boolean exp = expValues.isChecked();
+
 		switch (view.getId()) {
 
 		case R.id.b1_42:
-			intensity = 33;
+			if (!exp)
+				intensity = 33;
+			else
+				intensity = 11;
 			break;
 		case R.id.b1_84:
-			intensity = 66;
+			if (!exp)
+				intensity = 66;
+			else
+				intensity = 33;
 			break;
 		case R.id.b1_127:
 			intensity = 100;
 			break;
 		}
-		Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE) ;
+		Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 		vibe.vibrate(100);
 
 		CommandManager.setPulseForTime(1, intensity, startTime, pulse, length,

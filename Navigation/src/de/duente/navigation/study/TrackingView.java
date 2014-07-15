@@ -17,9 +17,6 @@ import android.view.View;
 public class TrackingView extends View {
 	private Paint paint;
 	private Bitmap img;
-
-	private int x = 0;
-	private int y = 0;
 	
 	private boolean signalActive = false;
 
@@ -64,13 +61,20 @@ public class TrackingView extends View {
 	 * @param z
 	 */
 	public void setCoordinateToDraw(float x, float y, float z) {
+		int xPic = 0;
+		int yPic = 0;
 		if (x != 0.0f && y != 0.0f && z != 0.0f) {
-			this.x = (int) ((x * 40.0f) + getWidth() / 1.5f);
-			this.y = (int) (z * 40.0f) + getHeight() / 8;	
+			xPic = (int) ((x * 40.0f) + getWidth() / 4);
+			yPic = (int) ((z * 40.0f) + getHeight() / 10);
+			
+			//Damit die Grenzen des Images nicht überschritten werden. 
+			xPic = Math.min(Math.max(0, xPic), getWidth() - 1);
+			yPic = Math.min(Math.max(0, yPic), getHeight() - 1);
+			
 			if(signalActive){
-				img.setPixel(this.x, this.y, Color.RED);	
+				img.setPixel(xPic, yPic, Color.RED);	
 			}else{
-				img.setPixel(this.x, this.y, Color.BLACK);
+				img.setPixel(xPic, yPic, Color.BLACK);
 			}
 					
 			drawMe = true;
