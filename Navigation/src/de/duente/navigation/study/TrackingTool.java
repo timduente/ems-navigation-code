@@ -8,10 +8,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.Collections;
-
 import com.example.navigation.R;
-
 import de.duente.navigation.actions.CommandManager;
 import de.duente.navigation.bluetooth.BluetoothConnector;
 import android.media.Ringtone;
@@ -30,6 +27,7 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -52,20 +50,31 @@ public class TrackingTool extends Activity {
 	private TextView textLeft;
 	private TextView textRight;
 	private TextView textCounter;
+	private Button startSignal;
 
 	private final static int ITERATION_COUNT = 5;
-	private final static int DIFFERENT_LEVEL_COUNT = 7;
+	private final static int DIFFERENT_LEVEL_COUNT = 8;
 	private final static int PARTICIPANT_COUNT = 30;
 	private ArrayList<Level> levels = new ArrayList<Level>();
 
 	private final static int TIME_AFTER_SIGNAL_END = 3000;
 	private final static int TIME_SIGNAL = 3000;
-	private final static String FILE_HEADER = "ParticipantID;Counter;IntensitaetsID;x;y;z;FrameID;Latency???;Sendedatum;Ankunftsdatum;Signal an;\n";
+	private final static String FILE_HEADER = "Teilnehmer ID;Zaehler;Intensitaets ID;X;Y;Z;Frame ID;Pitch;Sendedatum;Ankunftsdatum;Signal an;Datum Signal an;Datum Signal aus;\n";
+	private final static String START = "START";
+	private final static String STOP = "STOP";
+	private final static String MOTIVE_SERVER_IP = "192.168.3.9";
+	private final static String TRACKING_DATEFORMAT = "dd-MM-yyyy kk:mm:ss:";
 
 	private InputStream in;
 	private boolean connected = false;
 	private int signalStarted = 0;
 	private int counter = 0;
+	private long signalStartTime = 0;
+	private long signalStopTime = 0;
+
+	private long signalStartTimeMillis;
+	private long signalStopTimeMillis;
+	private RandomLatinSquare randomLatinSquare = new RandomLatinSquare(DIFFERENT_LEVEL_COUNT);
 
 	private String[] state = new String[PARTICIPANT_COUNT];
 
@@ -128,7 +137,9 @@ public class TrackingTool extends Activity {
 			@Override
 			public void onItemSelected(AdapterView<?> arg0, View arg1,
 					int arg2, long arg3) {
-				Collections.shuffle(levels);
+				signalStartTime = 0;
+				signalStopTime = 0;
+				initialiazeRandomList();
 				changeFile();
 				counter = 0;
 				updateView();
@@ -140,6 +151,7 @@ public class TrackingTool extends Activity {
 		textLeft = (TextView) findViewById(R.id.textLeft);
 		textRight = (TextView) findViewById(R.id.textRight);
 		textCounter = (TextView) findViewById(R.id.textCount);
+		startSignal = (Button) findViewById(R.id.startSignal);
 
 		// Tracking Informationsempfaenger starten
 		new UDPReceiver().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
@@ -159,15 +171,8 @@ public class TrackingTool extends Activity {
 					BluetoothAdapter.ACTION_REQUEST_ENABLE);
 			startActivityForResult(enableBluetooth, REQUEST_ENABLE_BT);
 		}
-
-		for (int i = 0; i < DIFFERENT_LEVEL_COUNT; i++) {
-			for (int j = 0; j < ITERATION_COUNT; j++) {
-				levels.add(new Level(i));
-				// System.out.println(levels.get(i * ITERATION_COUNT + j));
-			}
-		}
-		// Reihenfolge der Intensitäten randomisieren
-		Collections.shuffle(levels);
+		
+		initialiazeRandomList();
 
 		bluetoothConnector = new BluetoothConnector(mac, adapter);
 		commandManager = new CommandManager(bluetoothConnector);
@@ -183,19 +188,36 @@ public class TrackingTool extends Activity {
 		}
 		new Thread(commandManager).start();
 	}
+	
+	private void initialiazeRandomList(){
+		int[] randomizedNumbers = randomLatinSquare.randomize(10);
+		for (int j = 0; j < ITERATION_COUNT; j++) {
+			for (int i = 0; i < DIFFERENT_LEVEL_COUNT; i++) {
+				if(j%2 == 0)
+					levels.add(new Level(randomizedNumbers[j*DIFFERENT_LEVEL_COUNT + i]));
+				else{
+					levels.add(new Level(randomizedNumbers[j*DIFFERENT_LEVEL_COUNT +DIFFERENT_LEVEL_COUNT- 1-  i]));
+				}
+				System.out.println(levels.get(i * ITERATION_COUNT + j));
+			}
+		}
+	}
 
 	private void updateView() {
-		textCounter.setText("" +counter);
-		courseID.setText(levels.get(counter).toString());
-		if (levels.get(counter).channel == 0) {
-			textLeft.setVisibility(TextView.VISIBLE);
-			textRight.setVisibility(TextView.INVISIBLE);
+		if (counter >= levels.size()) {
+			spinner.setSelection(spinner.getSelectedItemPosition());
 		} else {
-			textLeft.setVisibility(TextView.INVISIBLE);
-			textRight.setVisibility(TextView.VISIBLE);
+			textCounter.setText("" + counter);
+			courseID.setText(levels.get(counter).toString());
+			if (levels.get(counter).channel == 0) {
+				textLeft.setVisibility(TextView.VISIBLE);
+				textRight.setVisibility(TextView.INVISIBLE);
+			} else {
+				textLeft.setVisibility(TextView.INVISIBLE);
+				textRight.setVisibility(TextView.VISIBLE);
+			}
 		}
-		
-		
+
 	}
 
 	@Override
@@ -214,6 +236,7 @@ public class TrackingTool extends Activity {
 				e.printStackTrace();
 			}
 		}
+		
 		if (!isExternalStorageWritable()) {
 			System.out.println("Externer Speicher ist nicht verfügbar");
 		}
@@ -253,7 +276,7 @@ public class TrackingTool extends Activity {
 		trackingEnabled = true;
 		view.setEnabled(false);
 		if (counter < levels.size()) {
-			findViewById(R.id.startSignal).setEnabled(true);
+			startSignal.setEnabled(true);
 		}
 	}
 
@@ -269,7 +292,13 @@ public class TrackingTool extends Activity {
 
 		CommandManager.setIntensityForTime(levels.get(counter).channel,
 				levels.get(counter).intensity, TIME_SIGNAL);
-		findViewById(R.id.startSignal).setEnabled(false);
+
+		signalStartTimeMillis = System.currentTimeMillis();
+
+		new TimeReceiver().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+				START);
+
+		startSignal.setEnabled(false);
 	}
 
 	private void stopSignal() {
@@ -288,7 +317,7 @@ public class TrackingTool extends Activity {
 		counter++;
 		findViewById(R.id.startTracking).setEnabled(true);
 		this.updateView();
-
+		signalStopTime = 0;
 		try {
 			if (fileWriter != null) {
 				fileWriter.append("\n");
@@ -297,7 +326,7 @@ public class TrackingTool extends Activity {
 			// TODO: Auto Catch
 			ioEx.printStackTrace();
 		}
-		if (counter >= levels.size()) {
+		if (counter > levels.size()) {
 			soundHandler.post(soundRunnable);
 		}
 	}
@@ -329,6 +358,39 @@ public class TrackingTool extends Activity {
 	}
 
 	/**
+	 * Diese Klasse bekommt den Zeitwert von einem Zeitserver.
+	 * 
+	 * @author Tim Dünte
+	 * 
+	 */
+	private class TimeReceiver extends AsyncTask<String, String, String> {
+		private final static int TIMEOUT_MILLIS = 500;
+
+		@Override
+		protected String doInBackground(String... params) {
+			if (params.length == 1) {
+				SntpClient client = new SntpClient();
+				long sendTimeMillis = System.currentTimeMillis();
+				long now = 0;
+				if (client.requestTime(MOTIVE_SERVER_IP, TIMEOUT_MILLIS)) {
+					now = client.getNtpTime() + SystemClock.elapsedRealtime()
+							- client.getNtpTimeReference();
+				}
+
+				if (params[0].equals(START)) {
+					signalStartTime = now
+							- (sendTimeMillis - signalStartTimeMillis);
+				} else if (params[0].equals(STOP)) {
+					signalStopTime = now
+							- (sendTimeMillis - signalStopTimeMillis);
+				}
+
+			}
+			return null;
+		}
+	}
+
+	/**
 	 * Empfängt und verarbeitet die Daten, die über die Bluetoothverbindung zum
 	 * Smartphone gesendet werden.
 	 * 
@@ -342,14 +404,16 @@ public class TrackingTool extends Activity {
 			while (connected) {
 				if (in != null) {
 					try {
-						String erg = new String();
-						char c;
-						while ((c = (char) in.read()) != ';') {
-							erg = erg + c;
-						}
-						if (erg.length() > 0) {
-							System.out.println("ERGEBNIS:" + erg);
-							this.publishProgress(erg);
+						if (in.available() > 0) {
+							String erg = new String();
+							char c;
+							while ((c = (char) in.read()) != ';') {
+								erg = erg + c;
+							}
+							if (erg.length() > 0) {
+								System.out.println("ERGEBNIS:" + erg);
+								this.publishProgress(erg);
+							}
 						}
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
@@ -381,12 +445,14 @@ public class TrackingTool extends Activity {
 		@Override
 		protected void onProgressUpdate(String... updates) {
 			if (updates.length > 0) {
-				if (updates[0].equals("STOP")) {
+				if (updates[0].equals(STOP)) {
+					signalStopTimeMillis = System.currentTimeMillis();
+					new TimeReceiver().executeOnExecutor(
+							AsyncTask.THREAD_POOL_EXECUTOR, STOP);
 					stopSignal();
 					handler.postDelayed(runnable, TIME_AFTER_SIGNAL_END);
 				}
 			}
-
 		}
 	}
 
@@ -399,6 +465,8 @@ public class TrackingTool extends Activity {
 	 */
 	private class UDPReceiver extends AsyncTask<String, String, String> {
 		private final static int LISTENING_PORT = 9045;
+		private final static int PACKET_SIZE = 96;
+		private final static int TIMEOUT_MILLIS = 250;
 		public boolean run = true;
 
 		@Override
@@ -411,30 +479,32 @@ public class TrackingTool extends Activity {
 				socket = null;
 				run = false;
 			}
+
 			SntpClient client = new SntpClient();
-			CharSequence deviceTime;
-			String values;
-			byte[] buffer = new byte[96];
+			String deviceTime;
+
 			DatagramPacket packet;
+			byte[] buffer = new byte[PACKET_SIZE];
+			String values;
+
 			while (run) {
 				try {
 					packet = new DatagramPacket(buffer, buffer.length);
 					socket.receive(packet);
 					values = new String(buffer).trim();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					values = "ERROR;";
 					e.printStackTrace();
 				}
 				deviceTime = "##TIMEOUT##;";
-				if (client.requestTime("192.168.3.9", 200)) {
+				if (client.requestTime(MOTIVE_SERVER_IP, TIMEOUT_MILLIS)) {
 					long now = client.getNtpTime()
 							+ SystemClock.elapsedRealtime()
 							- client.getNtpTimeReference();
-					deviceTime = DateFormat.format("dd-MM-yyyy hh:mm:ss:", now)
+					deviceTime = DateFormat.format(TRACKING_DATEFORMAT, now)
 							+ String.format("%03d;", now % 1000);
 				}
-				publishProgress(values, deviceTime.toString());
+				publishProgress(values, deviceTime);
 
 			}
 			return null;
@@ -450,18 +520,41 @@ public class TrackingTool extends Activity {
 			if (trackingEnabled) {
 				String[] values = progress[0].split(";");
 				try {
-					fileWriter.append(spinner.getSelectedItem().toString()
-							+ ";" + counter + ";" + levels.get(counter) + ";"
-							+ progress[0] + progress[1] + "" + signalStarted
-							+ ";\n");
+					String startTimeSignal = DateFormat.format(
+							TRACKING_DATEFORMAT, signalStartTime)
+							+ String.format("%03d;", signalStartTime % 1000);
+					String stopTimeSignal = DateFormat.format(
+							TRACKING_DATEFORMAT, signalStopTime)
+							+ String.format("%03d;", signalStopTime % 1000);
+
+					String[] split = progress[0].split(";");
+					String dateOfPictureInMillis = split[split.length - 1];
+
+					fileWriter
+							.append(spinner.getSelectedItem().toString()
+									+ ";"
+									+ counter
+									+ ";"
+									+ levels.get(counter)
+									+ ";"
+									+ progress[0]
+									+ progress[1]
+									+ ((dateOfPictureInMillis
+											.compareTo(startTimeSignal) >= 0) ? signalStarted
+											: 0) + ";" + startTimeSignal
+									+ stopTimeSignal + "\n");
+
+					trackView.setSignalActive(((dateOfPictureInMillis
+							.compareTo(startTimeSignal) >= 0) ? signalStarted
+							: 0) == 1);
+					trackView.setCoordinateToDraw(Float.parseFloat(values[0]),
+							Float.parseFloat(values[1]),
+							Float.parseFloat(values[2]));
+
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				trackView.setSignalActive(signalStarted == 1);
-				trackView.setCoordinateToDraw(Float.parseFloat(values[0]),
-						Float.parseFloat(values[1]),
-						Float.parseFloat(values[2]));
 			}
 		}
 	}
