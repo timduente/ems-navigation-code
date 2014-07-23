@@ -106,8 +106,12 @@ void EMSSystem::doActionCommand(String *command) {
 //		Serial.flush();
 
 		if (channel < size) {
-			emsChannels[channel]->activate();
-			emsChannels[channel]->setIntensity(intensity, false, signalLength);
+			if(intensity >0){
+				emsChannels[channel]->activate();
+				emsChannels[channel]->setIntensity(intensity, false, signalLength);
+			}else{
+				emsChannels[channel]->deactivate();
+			}
 		}
 	}
 }

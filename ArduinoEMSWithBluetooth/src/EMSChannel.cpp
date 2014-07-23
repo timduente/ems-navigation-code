@@ -21,7 +21,7 @@ EMSChannel::EMSChannel(uint8_t channel_to_Pads, uint8_t channel_to_Resistor,
 	this->channel_to_Resistor = channel_to_Resistor;
 	this->poti_slave_select_pin = poti_slave_select_pin;
 	increaseDecreaseTime = 0;
-	endTime = 0;
+	endTime = 1;
 
 	digitalPoti = new McpDigitalPot(poti_slave_select_pin, 5000);
 
@@ -68,6 +68,7 @@ void EMSChannel::activate() {
  * Schaltet das EMS-Signal auf den Widerstand
  */
 void EMSChannel::deactivate() {
+	endTime = 1;
 	digitalWrite(channel_to_Resistor, HIGH);
 	delay(MAX_ON_TIME_PHOTOMOS);
 	digitalWrite(channel_to_Pads, LOW);
@@ -154,9 +155,9 @@ void EMSChannel::setIntensity(int intensity, bool increaseDecrease,
 		unsigned int time) {
 
 	//Es wird noch auf einen Befehl gewartet, der noch nicht zu Ende ist. Der kommende Befehl wird NICHT ausgeführt.
-	if (endTime) {
-		return;
-	}
+//	if (endTime) {
+//		return;
+//	}
 
 	intensity = int ((maxIntensity - minIntensity) * intensity / 100.0f + 0.5f) + minIntensity;
 
