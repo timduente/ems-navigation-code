@@ -74,6 +74,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="de.duente.navigation.study.CalibrationDialog"
+            android:label="@string/title_activity_calibration_dialog" >
+        </activity>
+        <activity
+            android:name="de.duente.navigation.study.CalibrationDialogAngle"
+            android:label="@string/title_activity_calibration_dialog_angle" >
+        </activity>
     </application>
 
 </manifest>

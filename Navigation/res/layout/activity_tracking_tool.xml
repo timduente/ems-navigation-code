@@ -9,7 +9,7 @@
     tools:context=".TrackingTool" >
 
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/calibrationTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/textView2"
         android:layout_alignBottom="@+id/textView2"
-        android:layout_toLeftOf="@+id/button1"
+        android:layout_toLeftOf="@+id/backButton"
         android:layout_toRightOf="@+id/textView2"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -41,7 +41,7 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/startTracking"
         android:layout_below="@+id/spinnerParticipants"
-        android:text="Kurs ID:"
+        android:text="Level:"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
@@ -57,21 +57,21 @@
         android:id="@+id/trackingView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/textView1"
+        android:layout_above="@+id/calibrationTitle"
         android:layout_alignParentLeft="true"
-        android:layout_alignRight="@+id/textView1"
+        android:layout_alignRight="@+id/calibrationTitle"
         android:layout_below="@+id/startSignal" />
 
     <Button
-        android:id="@+id/button1"
+        android:id="@+id/backButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/startTracking"
-        android:layout_alignRight="@+id/startSignal"
+        android:layout_alignParentRight="true"
         android:layout_alignTop="@+id/startTracking"
         android:layout_toRightOf="@+id/startTracking"
-        android:onClick="stopTracking"
-        android:text="Stop!"
+        android:onClick="calibrate"
+        android:text="Kalibrierung"
         android:textAppearance="?android:attr/textAppearanceLargeInverse" />
 
     <TextView
@@ -80,7 +80,7 @@
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/textLeft"
         android:layout_alignBottom="@+id/textLeft"
-        android:layout_alignRight="@+id/button1"
+        android:layout_alignParentRight="true"
         android:text="Rechts"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textSize="40sp" />
@@ -90,6 +90,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/textLeft"
+        android:layout_alignRight="@+id/textView3"
         android:layout_centerVertical="true"
         android:enabled="false"
         android:onClick="startSignal"
@@ -120,9 +121,9 @@
         android:id="@+id/textView4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/button1"
+        android:layout_above="@+id/backButton"
         android:layout_alignLeft="@+id/textRight"
-        android:text="Count"
+        android:text="Anzahl: "
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
@@ -131,8 +132,20 @@
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/textView4"
         android:layout_alignBottom="@+id/textView4"
-        android:layout_alignRight="@+id/button1"
+        android:layout_alignParentRight="true"
         android:layout_toRightOf="@+id/textView4"
         android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <Button
+        android:id="@+id/stopSignal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/startSignal"
+        android:layout_alignBottom="@+id/startSignal"
+        android:layout_alignLeft="@+id/spinnerParticipants"
+        android:layout_alignParentRight="true"
+        android:onClick="stopSignal"
+        android:text="Stop!"
+        android:textAppearance="?android:attr/textAppearanceLargeInverse" />
 
 </RelativeLayout>

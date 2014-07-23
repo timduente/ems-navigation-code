@@ -16,6 +16,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -26,18 +28,22 @@ import android.widget.TextView;
  * @author Tim Dünte
  * 
  */
-public class Calibration extends Activity {
+public class Calibration extends Activity implements OnSeekBarChangeListener {
 	public static final String CALIBRATION_VALUES = "calibrationValues";
 	public static final String BLUETOOTH_MANAGED_BY_STARTING_ACTIVITY = "Bluetooth is managed by the activity, which starts this Activity";
-	
-private static final float STEPS_IN_PERCENT = 4.0f;
+
+	private static final float STEPS_IN_PERCENT = 4.0f;
 
 	// Floatingpoint insgesammt 6 Stellen 0 Nachkomma stellen mit Prozentzeichen
 	// da hinter.
 	private static final String NUMBER_FORMAT = "%6.0f%%";
 
-	private String[] state = { "0", "1" };
-	private float[] calibrationSettings = new float[state.length];
+	// Anzahl der Kanäle und Anzahl der Stufen pro Kanal.
+	private String[] channels = { "0", "1" };
+	private String[] angles = { "1", "2", "3" };
+
+	private float[] calibrationSettings = new float[channels.length
+			* angles.length];
 
 	float shownIntensity = 0.0f;
 	int times = 0;
@@ -46,23 +52,35 @@ private static final float STEPS_IN_PERCENT = 4.0f;
 	private Spinner spinner;
 	private TextView textCurrentIntensityInPercent;
 	private TextView textLastIntensityPercent;
+	private SeekBar slider;
+	private TextView textSliderIntensity;
+	private Spinner spinnerAngle;
 
 	// Handler und dazugehöriges Runnable
 	private Handler handler = new Handler();
 	private Runnable runnable = new Runnable() {
+		float factor = 1.0f;
+
 		@Override
 		public void run() {
-			shownIntensity = shownIntensity + STEPS_IN_PERCENT;
-			
+
+			if (shownIntensity >= 40)
+				factor = 4.0f;
+			else if (shownIntensity >= 20) {
+				factor = 2.0f;
+			}
+			shownIntensity = shownIntensity + factor;
+
 			textCurrentIntensityInPercent.setText(String.format(NUMBER_FORMAT,
 					shownIntensity));
 			String selectedChannel = (String) spinner.getSelectedItem();
 			CommandManager.setIntensityForTime(
-					Integer.parseInt(selectedChannel),(int) shownIntensity, 500);
+					Integer.parseInt(selectedChannel), (int) shownIntensity,
+					500);
 
 			if (shownIntensity < 100.0f) {
 				handler.postDelayed(this, 1000);
-			}else{
+			} else {
 				stopCalibration(null);
 			}
 		}
@@ -81,13 +99,18 @@ private static final float STEPS_IN_PERCENT = 4.0f;
 			calibrationSettings = startIntent
 					.getFloatArrayExtra(Calibration.CALIBRATION_VALUES);
 
-			state = new String[calibrationSettings.length];
-			for (int i = 0; i < state.length; i++) {
-				state[i] = i + "";
+			channels = new String[calibrationSettings.length];
+			for (int i = 0; i < channels.length; i++) {
+				channels[i] = i + "";
 			}
 		}
+		textSliderIntensity = (TextView) findViewById(R.id.textView2);
+
+		slider = (SeekBar) findViewById(R.id.seekBar1);
+		slider.setOnSeekBarChangeListener(this);
 
 		spinner = (Spinner) findViewById(R.id.spinnerChannel);
+		spinnerAngle = (Spinner) findViewById(R.id.spinner1);
 		textCurrentIntensityInPercent = (TextView) findViewById(R.id.textIntensityPercent);
 		textLastIntensityPercent = (TextView) findViewById(R.id.textLastIntensityPercent);
 
@@ -96,7 +119,7 @@ private static final float STEPS_IN_PERCENT = 4.0f;
 		textLastIntensityPercent.setText(String.format(NUMBER_FORMAT, 0.0f));
 
 		ArrayAdapter<String> adapter_state = new ArrayAdapter<String>(this,
-				android.R.layout.simple_spinner_item, state);
+				android.R.layout.simple_spinner_item, channels);
 
 		spinner.setAdapter(adapter_state);
 		spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
@@ -108,7 +131,30 @@ private static final float STEPS_IN_PERCENT = 4.0f;
 				textCurrentIntensityInPercent.setText(String.format(
 						NUMBER_FORMAT, 0.0f));
 				textLastIntensityPercent.setText(String.format(NUMBER_FORMAT,
-						calibrationSettings[Integer.parseInt(selectedChannel)]));
+						calibrationSettings[Integer.parseInt(selectedChannel)
+								* angles.length]));
+				spinnerAngle.setSelection(0);
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parentView) {
+				// nichts passiert.
+			}
+		});
+
+		ArrayAdapter<String> adapter_state_angle = new ArrayAdapter<String>(
+				this, android.R.layout.simple_spinner_item, angles);
+
+		spinnerAngle.setAdapter(adapter_state_angle);
+		spinnerAngle.setOnItemSelectedListener(new OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(AdapterView<?> parentView,
+					View selectedItemView, int position, long id) {
+
+				slider.setProgress((int) calibrationSettings[angles.length
+						* Integer.parseInt((String) spinner.getSelectedItem())
+						+ angles.length
+						- (spinnerAngle.getSelectedItemPosition() + 1)]);
 			}
 
 			@Override
@@ -159,17 +205,16 @@ private static final float STEPS_IN_PERCENT = 4.0f;
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.calibration, menu);
-		return true;
-	}
-
-	@Override
 	public void onBackPressed() {
 		// Ergebnisse der Kalibrierung werden in einem Intent übergeben.
+		
+		float[] results = new float[calibrationSettings.length];
+		for(int i = 0; i< angles.length; i++){
+			results[i] = calibrationSettings[angles.length - 1 - i];
+			results[i+ angles.length] = calibrationSettings[angles.length * 2 - 1 - i];
+		}
 		Intent resultIntent = new Intent();
-		resultIntent.putExtra(CALIBRATION_VALUES, calibrationSettings);
+		resultIntent.putExtra(CALIBRATION_VALUES, results);
 		setResult(RESULT_OK, resultIntent);
 		super.onBackPressed();
 	}
@@ -188,11 +233,12 @@ private static final float STEPS_IN_PERCENT = 4.0f;
 
 		String s = (String) spinner.getSelectedItem();
 		int channelNumber = Integer.parseInt(s);
-		calibrationSettings[channelNumber] = shownIntensity;
+		calibrationSettings[channelNumber * angles.length] = 100.0f;
 		textLastIntensityPercent.setText(String.format(NUMBER_FORMAT,
 				shownIntensity));
-		
-		CommandManager.setMaxIntensityForChannel(channelNumber, (int)shownIntensity);
+
+		CommandManager.setMaxIntensityForChannel(channelNumber,
+				(int) shownIntensity);
 	}
 
 	/**
@@ -206,7 +252,7 @@ private static final float STEPS_IN_PERCENT = 4.0f;
 		String s = (String) spinner.getSelectedItem();
 		int channelNumber = Integer.parseInt(s);
 		CommandManager.setMaxIntensityForChannel(channelNumber, 100);
-		
+
 		shownIntensity = 0.0f;
 		times = 0;
 		handler.postDelayed(runnable, 100);
@@ -225,8 +271,56 @@ private static final float STEPS_IN_PERCENT = 4.0f;
 	public void testIntensity(View view) {
 		String s = (String) spinner.getSelectedItem();
 		int channel = Integer.parseInt(s);
-		CommandManager.setIntensityForTime(channel,
-				100, 1000);
+		CommandManager.setIntensityForTime(channel, 100, 5000);
+	}
+
+	public void testAngle(View view) {
+		String s = (String) spinner.getSelectedItem();
+		int channelNumber = Integer.parseInt(s);
+		CommandManager.setIntensityForTime(channelNumber, slider.getProgress(),
+				30000);
+	}
+
+	public void stopTestingAngle(View view) {
+		String s = (String) spinner.getSelectedItem();
+		int channelNumber = Integer.parseInt(s);
+		CommandManager.setIntensityForTime(channelNumber, 0, 10);
+		calibrationSettings[angles.length
+				* Integer.parseInt((String) spinner.getSelectedItem())
+				+ angles.length - (spinnerAngle.getSelectedItemPosition() + 1)] = slider
+				.getProgress();
+	}
+
+	private int lastPosition = 0;
+
+	@Override
+	public void onProgressChanged(SeekBar seekBar, int progress,
+			boolean fromUser) {
+		textSliderIntensity.setText(progress + "%");
+		String s = (String) spinner.getSelectedItem();
+		int channelNumber = Integer.parseInt(s);
+
+		if (lastPosition < progress) {
+			CommandManager.setIntensityForTime(channelNumber, progress, 30000);
+		} else {
+			CommandManager.setIntensityForTime(channelNumber, 0, 10);
+		}
+
+		lastPosition = progress;
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onStartTrackingTouch(SeekBar seekBar) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onStopTrackingTouch(SeekBar seekBar) {
+		// TODO Auto-generated method stub
+
 	}
 
 }

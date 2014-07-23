@@ -266,7 +266,7 @@ public class ShowPosition extends Activity implements LocationListener {
 	 */
 	public void startCalibrationActivity(View view) {
 		Intent intent = new Intent(this, Calibration.class);
-		intent.putExtra(Calibration.CALIBRATION_VALUES, intensity);
+		//intent.putExtra(Calibration.CALIBRATION_VALUES, intensity);
 		intent.putExtra(Calibration.BLUETOOTH_MANAGED_BY_STARTING_ACTIVITY,
 				true);
 		startActivityForResult(intent, REQUEST_CODE_CALIBRATION);
