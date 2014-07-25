@@ -108,7 +108,7 @@ void EMSSystem::doActionCommand(String *command) {
 		if (channel < size) {
 			if(intensity >0){
 				emsChannels[channel]->activate();
-				emsChannels[channel]->setIntensity(intensity, false, signalLength);
+				emsChannels[channel]->setIntensity(intensity-1, false, signalLength);
 			}else{
 				emsChannels[channel]->deactivate();
 			}
