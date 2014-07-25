@@ -106,7 +106,7 @@ public class Calibration extends Activity implements OnSeekBarChangeListener {
 		}
 		textSliderIntensity = (TextView) findViewById(R.id.textView2);
 
-		slider = (SeekBar) findViewById(R.id.seekBar1);
+		slider = (SeekBar) findViewById(R.id.seekBarMaxIntensity);
 		slider.setOnSeekBarChangeListener(this);
 
 		spinner = (Spinner) findViewById(R.id.spinnerChannel);

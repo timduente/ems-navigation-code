@@ -30,60 +30,10 @@
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <Button
-        android:id="@+id/buttonStartCalibration"
-        android:layout_width="125dp"
-        android:layout_height="60dp"
-        android:layout_column="0"
-        android:layout_gravity="left|top"
-        android:layout_marginTop="10dp"
-        android:layout_row="3"
-        android:onClick="startCalibration"
-        android:text="START" />
-
-    <Button
-        android:id="@+id/buttonStopCalibration"
-        android:layout_width="125dp"
-        android:layout_height="60dp"
-        android:layout_column="1"
-        android:layout_gravity="left|top"
-        android:layout_marginTop="10dp"
-        android:layout_row="3"
-        android:onClick="stopCalibration"
-        android:text="STOP" />
-
-    <TextView
-        android:id="@+id/textLastIntensity"
-        android:layout_column="0"
-        android:layout_gravity="left|top"
-        android:layout_marginTop="10dp"
-        android:layout_row="4"
-        android:text="Lezte Intensität:"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
-
-    <TextView
-        android:id="@+id/textLastIntensityPercent"
-        android:layout_column="1"
-        android:layout_gravity="left|top"
-        android:layout_marginTop="10dp"
-        android:layout_row="4"
-        android:text="0.00%"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
-
-    <Button
-        android:id="@+id/buttonCalibration"
-        android:layout_width="fill_parent"
-        android:layout_column="0"
-        android:layout_columnSpan="2"
-        android:layout_gravity="left|top"
-        android:layout_row="5"
-        android:onClick="testIntensity"
-        android:text="Teste Intensität 5s" />
-
-    <Button
         android1:id="@+id/backButton"
         android1:layout_column="0"
         android1:layout_gravity="left|bottom"
-        android1:layout_row="5"
+        android1:layout_row="6"
         android1:onClick="back"
         android1:text="@string/button_back" />
 
@@ -91,7 +41,7 @@
         android1:id="@+id/forwardButton"
         android1:layout_column="1"
         android1:layout_gravity="right|bottom"
-        android1:layout_row="5"
+        android1:layout_row="6"
         android1:onClick="forward"
         android1:text="@string/button_forward" />
 
@@ -105,5 +55,35 @@
         android1:layout_row="0"
         android1:text="@string/calibrate_title_left"
         android1:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <Button
+        android1:id="@+id/buttonStopCalibration"
+        android1:layout_width="125dp"
+        android1:layout_height="60dp"
+        android1:layout_column="1"
+        android1:layout_gravity="right|top"
+        android1:layout_marginTop="10dp"
+        android1:layout_row="6"
+        android1:onClick="stopCalibration"
+        android1:text="STOP" />
+
+    <Button
+        android1:id="@+id/buttonStartCalibration"
+        android1:layout_width="125dp"
+        android1:layout_height="60dp"
+        android1:layout_column="0"
+        android1:layout_gravity="left|top"
+        android1:layout_marginTop="10dp"
+        android1:layout_row="6"
+        android1:onClick="testIntensity"
+        android1:text="TEST" />
+
+    <SeekBar
+        android1:id="@+id/seekBarMaxIntensity"
+        android1:layout_width="match_parent"
+        android1:layout_column="0"
+        android1:layout_columnSpan="2"
+        android1:layout_gravity="left|top"
+        android1:layout_row="5" />
 
 </GridLayout>

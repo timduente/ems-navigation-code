@@ -88,14 +88,12 @@ public class CalibrationDialogAngle extends Activity implements
 		calibrationSettings = startIntent
 				.getIntArrayExtra(CalibrationDialog.CALIBRATION_VALUES);
 
-		for (int i = 0; i < alpha.length; i++) {
-			alpha[i].setProgress(1);
-			alpha[i].setOnSeekBarChangeListener(this);
+		for (int i = 0; i < alpha.length; i++) {		
 			alpha[i].setProgress(calibrationSettings[(i + 1)
 					+ CalibrationDialog.resultCount * channel]);
-
+			alpha[i].setOnSeekBarChangeListener(this);
 		}
-
+		updateView();
 	}
 
 	@Override
@@ -118,7 +116,12 @@ public class CalibrationDialogAngle extends Activity implements
 
 	@Override
 	public void onBackPressed() {
+		stop(null);
 		// Ergebnisse der Kalibrierung werden in einem Intent übergeben.
+		for (int i = 0; i < alpha.length; i++) {
+			calibrationSettings[(i + 1) + CalibrationDialog.resultCount
+					* channel] = alpha[i].getProgress();
+		}
 		Intent resultIntent = new Intent();
 		resultIntent.putExtra(CalibrationDialog.CALIBRATION_VALUES,
 				calibrationSettings);
@@ -127,10 +130,12 @@ public class CalibrationDialogAngle extends Activity implements
 	}
 
 	public void back(View view) {
+		
 		onBackPressed();
 	}
 
 	private void forward() {
+		stop(null);
 		Intent intent = new Intent(this, CalibrationDialog.class);
 		for (int i = 0; i < alpha.length; i++) {
 			calibrationSettings[(i + 1) + CalibrationDialog.resultCount
@@ -165,15 +170,21 @@ public class CalibrationDialogAngle extends Activity implements
 	}
 
 	public void stop(View view) {
-		CommandManager.setIntensityForTime(channel, 0, 0);
+		CommandManager.stopSignal(channel);
+	}
+	
+	public void updateView(){
+		for (int i = 0; i < alpha.length; i++) {
+			labels[i].setText(alpha[i].getProgress() + "%");
+		}
 	}
 
 	@Override
 	public void onProgressChanged(SeekBar seekBar, int progress,
 			boolean fromUser) {
+		updateView();
 		for (int i = 0; i < alpha.length; i++) {
 			if (alpha[i] == seekBar) {
-				labels[i].setText(progress + "%");
 				CommandManager.setIntensityForTime(channel, progress, 5000);
 			}
 		}

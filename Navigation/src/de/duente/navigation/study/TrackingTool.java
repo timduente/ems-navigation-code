@@ -244,7 +244,7 @@ public class TrackingTool extends Activity {
 
 		file = new File(pathToLogs, spinner.getSelectedItem().toString() + ".csv");
 
-		if (!file.exists() || file.length() <= FILE_HEADER.length()) {
+		if (!file.exists() || file.length() <= FILE_HEADER.length()+1) {
 			try {
 				fileWriter = new FileWriter(file);
 				writeLineToFile(FILE_HEADER);

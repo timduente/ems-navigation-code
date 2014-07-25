@@ -4,13 +4,14 @@ import com.example.navigation.R;
 
 import de.duente.navigation.actions.CommandManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.app.Activity;
 import android.content.Intent;
 import android.view.View;
+import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
-public class CalibrationDialog extends Activity {
+public class CalibrationDialog extends Activity implements OnSeekBarChangeListener {
 
 	public static final String CALIBRATION_VALUES = "calibrationValues";
 	public static final String BLUETOOTH_MANAGED_BY_STARTING_ACTIVITY = "Bluetooth is managed by the activity, which starts this Activity";
@@ -24,39 +25,11 @@ public class CalibrationDialog extends Activity {
 	private int channel;
 	public final static int resultCount = 4;
 
-	int shownIntensity = 0;
-
 	// GUI Elemente
 	private TextView calibrationTitle;
 	private TextView textCurrentIntensityInPercent;
-	private TextView textLastIntensityPercent;
+	private SeekBar intensity;
 
-	// Handler und dazugehöriges Runnable
-	private Handler handler = new Handler();
-	private Runnable runnable = new Runnable() {
-		int factor = 1;
-
-		@Override
-		public void run() {
-			if (shownIntensity >= 40)
-				factor = 4;
-			else if (shownIntensity >= 20) {
-				factor = 2;
-			}
-			shownIntensity = shownIntensity + factor;
-
-			textCurrentIntensityInPercent.setText(String.format(NUMBER_FORMAT,
-					shownIntensity));
-			CommandManager.setIntensityForTime(channel, (int) shownIntensity,
-					500);
-
-			if (shownIntensity < 100) {
-				handler.postDelayed(this, 1000);
-			} else {
-				stopCalibration(null);
-			}
-		}
-	};
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -65,10 +38,11 @@ public class CalibrationDialog extends Activity {
 		Intent startIntent = getIntent();
 		calibrationTitle = (TextView) findViewById(R.id.calibrationTitle);
 		textCurrentIntensityInPercent = (TextView) findViewById(R.id.textIntensityPercent);
-		textLastIntensityPercent = (TextView) findViewById(R.id.textLastIntensityPercent);
+		intensity = (SeekBar) findViewById(R.id.seekBarMaxIntensity);
+		intensity.setOnSeekBarChangeListener(this);
 
 		textCurrentIntensityInPercent.setText(String.format(NUMBER_FORMAT, 0));
-		textLastIntensityPercent.setText(String.format(NUMBER_FORMAT, 0));
+
 
 		if (startIntent.getBooleanExtra(CALIBRATING_LEFT_CHANNEL, true)) {
 			calibrationTitle.setText(R.string.calibrate_title_left);
@@ -81,9 +55,6 @@ public class CalibrationDialog extends Activity {
 		if (startIntent.hasExtra(CalibrationDialog.CALIBRATION_VALUES)) {
 			calibrationSettings = startIntent
 					.getIntArrayExtra(CALIBRATION_VALUES);
-			textLastIntensityPercent.setText(String.format(NUMBER_FORMAT,
-					calibrationSettings[channel * resultCount]));
-			;
 		}
 	}
 
@@ -110,9 +81,11 @@ public class CalibrationDialog extends Activity {
 
 	@Override
 	public void onBackPressed() {
+		CommandManager.stopSignal(channel);	
 		// Ergebnisse der Kalibrierung werden in einem Intent übergeben.
 		Intent resultIntent = new Intent();
-		// resultIntent.putExtra(CALIBRATION_VALUES, calibrationSettings);
+		
+		resultIntent.putExtra(CALIBRATION_VALUES, calibrationSettings);
 		setResult(RESULT_CANCELED, resultIntent);
 		super.onBackPressed();
 	}
@@ -122,6 +95,7 @@ public class CalibrationDialog extends Activity {
 	}
 
 	public void forward(View view) {
+		CommandManager.stopSignal(channel);	
 		Intent intent = new Intent(this, CalibrationDialogAngle.class);
 		intent.putExtra(CALIBRATION_VALUES, calibrationSettings);
 		if (channel == 1) {
@@ -132,40 +106,17 @@ public class CalibrationDialog extends Activity {
 	}
 
 	/**
-	 * Stoppt das Steigern der Intensitaet. Die zuletzt angezeigte Intensitaet
-	 * wird gesichert.
+	 * Stoppt das Signal
 	 * 
 	 * @param view
 	 *            View von dem diese Methode aufgerufen wurde.
 	 */
 	public void stopCalibration(View view) {
-		handler.removeCallbacks(runnable);
-		findViewById(R.id.buttonStartCalibration).setEnabled(true);
-
-		calibrationSettings[channel * resultCount] = shownIntensity;
-		calibrationSettings[resultCount + channel * resultCount - 1] = 100;
-		textLastIntensityPercent.setText(String.format(NUMBER_FORMAT,
-				shownIntensity));
-
-		CommandManager.setMaxIntensityForChannel(channel, (int) shownIntensity);
+		CommandManager.stopSignal(channel);		
 	}
 
 	/**
-	 * Startet das Steigern der Intensitaet. Laeuft bis 100% oder bis Stopp
-	 * gedrueckt wurde.
-	 * 
-	 * @param view
-	 *            View von dem diese Methode aufgerufen wurde.
-	 */
-	public void startCalibration(View view) {
-		CommandManager.setMaxIntensityForChannel(channel, 100);
-		shownIntensity = 0;
-		handler.postDelayed(runnable, 100);
-		view.setEnabled(false);
-	}
-
-	/**
-	 * Aktiviert den Kanal fuer eine Sekunde mit der zuletzt kalibrierten
+	 * Aktiviert den Kanal fuer fünf Sekunden mit der zuletzt kalibrierten
 	 * Intensitaet.
 	 * 
 	 * @param view
@@ -173,5 +124,27 @@ public class CalibrationDialog extends Activity {
 	 */
 	public void testIntensity(View view) {
 		CommandManager.setIntensityForTime(channel, 100, 5000);
+	}
+
+	@Override
+	public void onProgressChanged(SeekBar seekBar, int progress,
+			boolean fromUser) {
+		textCurrentIntensityInPercent.setText(String.format(NUMBER_FORMAT, progress));		
+		CommandManager.setMaxIntensityForChannel(channel, progress);
+		CommandManager.setIntensityForTime(channel, 100, 5000);
+		calibrationSettings[channel * resultCount] = progress;
+		calibrationSettings[resultCount + channel * resultCount - 1] = 100;
+	}
+
+	@Override
+	public void onStartTrackingTouch(SeekBar seekBar) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onStopTrackingTouch(SeekBar seekBar) {
+		// TODO Auto-generated method stub
+		
 	}
 }

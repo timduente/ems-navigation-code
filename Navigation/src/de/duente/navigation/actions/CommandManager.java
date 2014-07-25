@@ -27,7 +27,8 @@ public class CommandManager implements Runnable {
 	 *            Potentiometers.
 	 */
 	public static void setStepTimeForChannel(int channel, int stepTime) {
-		ActionList.addAction(new Option(System.currentTimeMillis(), Option.OPTION.SET_CHANGE_TIME, channel, stepTime ));
+		ActionList.addAction(new Option(System.currentTimeMillis(),
+				Option.OPTION.SET_CHANGE_TIME, channel, stepTime));
 	}
 
 	/**
@@ -39,7 +40,8 @@ public class CommandManager implements Runnable {
 	 *            maximale Intensitaet in Prozent 0-100
 	 */
 	public static void setMaxIntensityForChannel(int channel, int max) {
-		ActionList.addAction(new Option(System.currentTimeMillis(), Option.OPTION.SET_CALIBRATION_MAXIMUM, channel, max ));
+		ActionList.addAction(new Option(System.currentTimeMillis(),
+				Option.OPTION.SET_CALIBRATION_MAXIMUM, channel, max));
 	}
 
 	/**
@@ -51,7 +53,8 @@ public class CommandManager implements Runnable {
 	 *            minimale Intensitaet in Prozent 0-100
 	 */
 	public static void setMinIntensityForChannel(int channel, int min) {
-		ActionList.addAction(new Option(System.currentTimeMillis(), Option.OPTION.SET_CALIBRATION_MINIMUM, channel, min ));
+		ActionList.addAction(new Option(System.currentTimeMillis(),
+				Option.OPTION.SET_CALIBRATION_MINIMUM, channel, min));
 	}
 
 	/**
@@ -69,6 +72,17 @@ public class CommandManager implements Runnable {
 			int onTime) {
 		ActionList.addAction(new Action(System.currentTimeMillis(), channel,
 				intensity, onTime));
+	}
+
+	/**
+	 * Lässt das Signal auf dem Kanal sofort ausgehen.
+	 * 
+	 * @param channel
+	 *            Kanal
+	 */
+	public static void stopSignal(int channel) {
+		ActionList.addAction(new Action(System.currentTimeMillis(), channel, 0,
+				0));
 	}
 
 	/**
@@ -142,7 +156,7 @@ public class CommandManager implements Runnable {
 			try {
 				// Hole Kommandos, die gesendet werden müssen
 				String commands = ActionList.getCommandsToDo();
-				//System.out.println(commands);
+				// System.out.println(commands);
 				if (commands.length() > 0) {
 					bluetoothConnector.sendText(commands);
 				}
