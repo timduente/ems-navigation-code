@@ -16,7 +16,7 @@
         android:layout_column="0"
         android:layout_gravity="left|top"
         android:layout_marginTop="0dp"
-        android:layout_row="2"
+        android:layout_row="1"
         android:text="Intensität:"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -25,7 +25,7 @@
         android:layout_column="1"
         android:layout_gravity="left|top"
         android:layout_marginTop="0dp"
-        android:layout_row="2"
+        android:layout_row="1"
         android:text="0.00%"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -63,7 +63,7 @@
         android1:layout_column="1"
         android1:layout_gravity="right|top"
         android1:layout_marginTop="10dp"
-        android1:layout_row="6"
+        android1:layout_row="3"
         android1:onClick="stopCalibration"
         android1:text="STOP" />
 
@@ -74,7 +74,7 @@
         android1:layout_column="0"
         android1:layout_gravity="left|top"
         android1:layout_marginTop="10dp"
-        android1:layout_row="6"
+        android1:layout_row="3"
         android1:onClick="testIntensity"
         android1:text="TEST" />
 
@@ -84,6 +84,16 @@
         android1:layout_column="0"
         android1:layout_columnSpan="2"
         android1:layout_gravity="left|top"
-        android1:layout_row="5" />
+        android1:layout_row="2" />
+
+    <Button
+        android1:id="@+id/buttonLoadLastCalib"
+        android1:layout_column="0"
+        android1:layout_columnSpan="2"
+        android1:layout_gravity="center_horizontal|top"
+        android1:layout_marginTop="40dp"
+        android1:layout_row="4"
+        android1:onClick="loadLastCalibSet"
+        android1:text="Lade letzte Kalibrierung" />
 
 </GridLayout>

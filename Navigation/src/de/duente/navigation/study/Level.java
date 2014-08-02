@@ -1,5 +1,10 @@
 package de.duente.navigation.study;
 
+/**Diese Klasse repräsentiert ein Level für die Studie. Ein Level enthält eine ID, eine Intensität und einen Kanal.
+ * 
+ * @author Tim Dünte
+ *
+ */
 public class Level implements Comparable<Level> {
 	public static final double ANGLE_DISTANCE = 5.0;
 
@@ -10,6 +15,10 @@ public class Level implements Comparable<Level> {
 	public double angle;
 	private int id;
 
+	/**Erstellt ein neues Level mit vorgebener ID.
+	 * 
+	 * @param id Wert von 0-7;
+	 */
 	public Level(int id) {
 		this.id = id - 4;
 

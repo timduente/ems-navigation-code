@@ -12,19 +12,6 @@ import android.bluetooth.BluetoothSocket;
 public class BluetoothConnector {
 	private OutputStream out;
 	private InputStream in;
-	private boolean connected;
-	
-	public boolean isConnected(){
-		return connected;
-	}
-	
-	/**
-	 * @return the in
-	 */
-	public InputStream getIn() {
-		return in;
-	}
-
 	private String mac;
 
 	// UUID fuer die Serielle Verbindung
@@ -39,7 +26,27 @@ public class BluetoothConnector {
 	public BluetoothConnector(String mac, BluetoothAdapter adapter) {
 		this.mac = mac;
 		this.adapter = adapter;
-		connected = false;
+	}
+
+	public boolean isConnected() {
+		if (socket == null) {
+			return false;
+		} else if (!socket.isConnected()) {
+			return false;
+		}
+		try {
+			sendText(";");
+			return true;
+		} catch (IOException ioEx) {
+			return false;
+		}
+	}
+
+	/**
+	 * @return the in
+	 */
+	public InputStream getIn() {
+		return in;
 	}
 
 	/**
@@ -56,22 +63,18 @@ public class BluetoothConnector {
 		socket.connect();
 		// Streams werden initialisiert
 		out = socket.getOutputStream();
-		 in = socket.getInputStream();
-		// Ist zuständig für das Empfangen eingehender Daten.
-		// TODO: new BluetoothReceiver().execute("");
-		 connected = true;
+		in = socket.getInputStream();
 	}
 
 	/**
 	 * Trennt die Verbindung zum Bluetoothchip
 	 */
-	public void disconnectBluetooth() throws IOException{
-		connected = false;
-			if (out != null)
-				out.close();
-			if (socket != null)
-				socket.close();
-			
+	public void disconnectBluetooth() throws IOException {
+		if (out != null)
+			out.close();
+		if (socket != null)
+			socket.close();
+
 	}
 
 	/**
@@ -80,24 +83,23 @@ public class BluetoothConnector {
 	 * @param text
 	 *            String der gesendet werden soll.
 	 */
-	public void sendText(String text) throws IOException{
-		if(!connected){
+	public void sendText(String text) throws IOException {
+		if (!socket.isConnected()) {
 			System.err.println("Fehler keine Verbindung");
 			return;
 		}
-		if (out != null) {		
-				// Der Text wird in Bytes umgewandelt, die dann einzeln
-				// versendet werden. So hoffe ich den Buffer nicht zu überfüllen
-				// vom Arduino
-				byte[] sendbytes = text.getBytes();
-				out.write(sendbytes);
-				out.flush();
-				
-				// System.out.println("Länge: " + sendbytes.length);
-				// out.write(text.getText().toString().getBytes());
-				//System.out.println(text);
+		if (out != null) {
+			// Der Text wird in Bytes umgewandelt, die dann
+			// versendet werden.
+			byte[] sendbytes = text.getBytes();
+			out.write(sendbytes);
+			out.flush();
+
+			// System.out.println("Länge: " + sendbytes.length);
+			// out.write(text.getText().toString().getBytes());
+			// System.out.println(text);
 		}
-		
+
 	}
 
 }

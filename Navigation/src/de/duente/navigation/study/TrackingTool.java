@@ -8,9 +8,7 @@ import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
-
 import com.example.navigation.R;
-
 import de.duente.navigation.Calibration;
 import de.duente.navigation.actions.CommandManager;
 import de.duente.navigation.bluetooth.BluetoothConnector;
@@ -27,6 +25,7 @@ import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.AdapterView;
@@ -55,12 +54,13 @@ public class TrackingTool extends Activity {
 	private TextView textLeft;
 	private TextView textRight;
 	private TextView textCounter;
+	private TextView connectionOn;
 	private Button startSignal;
 	private Button startTracking;
 
 	private final static int PARTICIPANT_COUNT = 30;
 
-	private final static int TIME_AFTER_SIGNAL_END = 2000;
+//	private final static int TIME_AFTER_SIGNAL_END = 2000;
 	private final static int TIME_SIGNAL = 30000;
 	private final static String FILE_HEADER = "Teilnehmer ID;Zaehler;Intensitaets ID;X;Y;Z;Frame ID;Pitch;Sendedatum;Ankunftsdatum;Signal an;Datum Signal an;Datum Signal aus;";
 	private final static String START = "START";
@@ -76,23 +76,28 @@ public class TrackingTool extends Activity {
 
 	private long signalStartTimeMillis;
 	private long signalStopTimeMillis;
-	private boolean signalGiven = false;
+	//private boolean signalGiven = false;
 
 	private String[] state = new String[PARTICIPANT_COUNT];
 
 	private Participant participant;
-	private AlertDialog alert;
+	private AlertDialog alertParticipantNeedsBreak;
+	private AlertDialog alertBluetoothConnectionFailed;
+	
+	
+	
 
 	private UDPReceiver udpReceiver;
 	private BluetoothReceiver bluetoothReceiver;
+	private BluetoothConnectionChecker bluetoothConnectionChecker;
 
-	Handler handler = new Handler();
-	private Runnable runnable = new Runnable() {
-		@Override
-		public void run() {
-			stopTracking(null);
-		}
-	};
+//	Handler handler = new Handler();
+//	private Runnable runnable = new Runnable() {
+//		@Override
+//		public void run() {
+//			stopTracking(null);
+//		}
+//	};
 
 	Handler soundHandler = new Handler();
 	private Runnable soundRunnable = new Runnable() {
@@ -168,13 +173,43 @@ public class TrackingTool extends Activity {
 
 		});
 
-		alert = builder.create();
+		alertParticipantNeedsBreak = builder.create();
+		
+		
+		AlertDialog.Builder builder2 = new AlertDialog.Builder(this);
+
+		builder2.setTitle("Verbindung zum Arduino fehlgeschlagen!");
+		builder2.setMessage("Verbindungsversuch erneut starten?");
+
+		builder2.setPositiveButton("JA", new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				reconnectBluetooth();
+				dialog.dismiss();
+			}
+
+		});
+
+		builder2.setNegativeButton("NEIN",
+				new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// Code der ausgeführt wird wenn NEIN geklickt wurde
+						dialog.dismiss();
+					}
+
+				});
+		alertBluetoothConnectionFailed = builder2.create();
+		
 
 		trackView = (TrackingView) findViewById(R.id.trackingView1);
 		courseID = (TextView) findViewById(R.id.courseID);
 		textLeft = (TextView) findViewById(R.id.textLeft);
 		textRight = (TextView) findViewById(R.id.textRight);
 		textCounter = (TextView) findViewById(R.id.textCount);
+		connectionOn = (TextView) findViewById(R.id.textConnectionOn);
 		startSignal = (Button) findViewById(R.id.startSignal);
 		startTracking = (Button) findViewById(R.id.startTracking);
 
@@ -195,8 +230,20 @@ public class TrackingTool extends Activity {
 		}
 
 		bluetoothConnector = new BluetoothConnector(mac, adapter);
+		bluetoothConnectionChecker  = new BluetoothConnectionChecker();
+		bluetoothConnectionChecker.checking = true;
+		bluetoothConnectionChecker.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void)null);
 		commandManager = new CommandManager(bluetoothConnector);
 		new Thread(commandManager).start();
+	}
+	
+	private void updateConnectionStatus(){
+		if(bluetoothConnector.isConnected()){
+			connectionOn.setBackgroundColor(Color.GREEN);
+		}else{
+			connectionOn.setBackgroundColor(Color.RED);
+			alertBluetoothConnectionFailed.show();
+		}
 	}
 
 	private void updateView() {
@@ -310,10 +357,10 @@ public class TrackingTool extends Activity {
 	 */
 	public void stopSignal(View view) {
 		if (participant.isInitialized()) {
-			CommandManager.setIntensityForTime(
-					participant.getActualLevel().channel, 0, 0);
+			CommandManager.stopSignal(participant.getActualLevel().channel);
 		}
-		handler.postDelayed(runnable, TIME_AFTER_SIGNAL_END);
+		//handler.postDelayed(runnable, TIME_AFTER_SIGNAL_END);
+		stopTracking(null);
 	}
 
 	private void stopSignal() {
@@ -321,8 +368,7 @@ public class TrackingTool extends Activity {
 		if (signalStarted == 0) {
 			return;
 		}
-		CommandManager.setIntensityForTime(
-				participant.getActualLevel().channel, 0, 0);
+		CommandManager.stopSignal(participant.getActualLevel().channel);
 		signalStarted = 0;
 		updateView();
 		//handler.postDelayed(runnable, TIME_AFTER_SIGNAL_END);
@@ -335,21 +381,24 @@ public class TrackingTool extends Activity {
 	 *            View Objekt, dass diese Methode aufruft.
 	 */
 	public void stopTracking(View view) {
-
-		udpReceiver.trackingEnabled = false;
-		participant.nextLevel();
+		boolean notDoubleStopHit = udpReceiver.trackingEnabled;	
+		udpReceiver.trackingEnabled = false;				
 		findViewById(R.id.startTracking).setEnabled(true);
+		if(notDoubleStopHit){
+			participant.nextLevel();
+		}
 		this.updateView();
 		signalStopTime = 0;
-		signalGiven = false;
+//		signalGiven = false;
 
 		writeLineToFile("");
 
 		if (participant.getActualLevelIndex()
 				% Participant.DIFFERENT_LEVEL_COUNT == 0
 				&& participant.getActualLevelIndex() > 0) {
-			alert.setTitle("Pause " + participant.getActualLevelIndex()/Participant.DIFFERENT_LEVEL_COUNT);
-			alert.show();
+			alertParticipantNeedsBreak.setTitle("Pause " + participant.getActualLevelIndex()/Participant.DIFFERENT_LEVEL_COUNT);
+			alertParticipantNeedsBreak.show();
+			writeLineToFile("");
 		}
 
 		if (participant.isStudyDone()) {
@@ -378,6 +427,7 @@ public class TrackingTool extends Activity {
 			}
 			try {
 				bluetoothConnector.disconnectBluetooth();
+				updateConnectionStatus();
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -398,23 +448,31 @@ public class TrackingTool extends Activity {
 		}
 		super.onDestroy();
 	}
+	
+	private void reconnectBluetooth(){
+		try {
+			bluetoothConnector.connectBluetooth();
+			if(bluetoothReceiver !=null){
+				bluetoothReceiver.connected = false;
+			}
+			bluetoothReceiver = new BluetoothReceiver();
+			bluetoothReceiver.connected = true;
+			bluetoothReceiver.setIn(bluetoothConnector.getIn());
+			bluetoothReceiver.executeOnExecutor(
+					AsyncTask.THREAD_POOL_EXECUTOR, "");
+
+		} catch (IOException e) {
+			//e.printStackTrace();
+			System.err.println("Creating BluetoothConnection failed!");
+		}
+		updateConnectionStatus();
+	}
 
 	@Override
 	public void onResume() {
 
 		if (!calibrationStarted) {
-			try {
-				bluetoothConnector.connectBluetooth();
-				bluetoothReceiver = new BluetoothReceiver();
-				bluetoothReceiver.connected = true;
-				bluetoothReceiver.setIn(bluetoothConnector.getIn());
-				bluetoothReceiver.executeOnExecutor(
-						AsyncTask.THREAD_POOL_EXECUTOR, "");
-
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			reconnectBluetooth();
 
 		} else {
 			this.calibrationStarted = false;
@@ -434,6 +492,10 @@ public class TrackingTool extends Activity {
 		return false;
 	}
 
+	/**Startet den Kalibrierungsdialog
+	 * 
+	 * @param view View-Objekt, dass diese Methode aufruft.
+	 */
 	public void calibrate(View view) {
 		calibrationStarted = true;
 		Intent intent = new Intent(this, CalibrationDialog.class);
@@ -491,6 +553,34 @@ public class TrackingTool extends Activity {
 			return null;
 		}
 	}
+	
+	/**Diese Klasse überprüft jede Sekunde den Zustand des BluetoothConnectors indem sie updateConnectionStatus aufruft.
+	 * 
+	 * @author Tim Dünte
+	 *
+	 */
+	private class BluetoothConnectionChecker extends AsyncTask<Void,Void,Void>{
+		boolean checking = false;
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			while(checking){
+				this.publishProgress((Void[])null);
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			return null;
+		}
+		
+		@Override
+		protected void onProgressUpdate(Void... progress) {
+			updateConnectionStatus();
+		}
+	}
+	
 
 	/**
 	 * Empfängt und verarbeitet die Daten, die über die Bluetoothverbindung zum
@@ -581,11 +671,11 @@ public class TrackingTool extends Activity {
 		boolean run = true;
 		boolean trackingEnabled = false;
 
-		private float[] signalStartCords = new float[3];
-
-		private double getAngle(float x1, float y1, float x2, float y2) {
-			return Math.atan2(y2 - y1, x2 - x1) * 180.0 / Math.PI;
-		}
+//		private float[] signalStartCords = new float[3];
+//
+//		private double getAngle(float x1, float y1, float x2, float y2) {
+//			return Math.atan2(y2 - y1, x2 - x1) * 180.0 / Math.PI;
+//		}
 
 		@Override
 		protected String doInBackground(String... params) {
@@ -672,28 +762,28 @@ public class TrackingTool extends Activity {
 						.setSignalActive(((isSignalOnInCurrentPicture) ? signalStarted
 								: 0) == 1);
 
-				if (FEEDBACK_LOOP_ON && isSignalOnInCurrentPicture
-						&& !signalGiven) {
-					signalGiven = true;
-					signalStartCords[0] = Float.parseFloat(split[3]);
-					signalStartCords[1] = Float.parseFloat(split[4]);
-					signalStartCords[2] = Float.parseFloat(split[5]);
-				}
-
-				else if (FEEDBACK_LOOP_ON && signalGiven) {
-					float currentX = Float.parseFloat(split[3]);
-					float currentZ = Float.parseFloat(split[5]);
-					double angle = getAngle(signalStartCords[0],
-							signalStartCords[2], currentX, currentZ);
-
-					if (participant.getActualLevel().angle > 0
-							&& angle >= participant.getActualLevel().angle) {
-						stopSignal();
-					} else if (participant.getActualLevel().angle < 0
-							&& angle <= participant.getActualLevel().angle) {
-						stopSignal();
-					}
-				}
+//				if (FEEDBACK_LOOP_ON && isSignalOnInCurrentPicture
+//						&& !signalGiven) {
+//					signalGiven = true;
+//					signalStartCords[0] = Float.parseFloat(split[3]);
+//					signalStartCords[1] = Float.parseFloat(split[4]);
+//					signalStartCords[2] = Float.parseFloat(split[5]);
+//				}
+//
+//				else if (FEEDBACK_LOOP_ON && signalGiven) {
+//					float currentX = Float.parseFloat(split[3]);
+//					float currentZ = Float.parseFloat(split[5]);
+//					double angle = getAngle(signalStartCords[0],
+//							signalStartCords[2], currentX, currentZ);
+//
+//					if (participant.getActualLevel().angle > 0
+//							&& angle >= participant.getActualLevel().angle) {
+//						stopSignal();
+//					} else if (participant.getActualLevel().angle < 0
+//							&& angle <= participant.getActualLevel().angle) {
+//						stopSignal();
+//					}
+//				}
 
 				trackView.setCoordinateToDraw(Float.parseFloat(values[0]),
 						Float.parseFloat(values[1]),

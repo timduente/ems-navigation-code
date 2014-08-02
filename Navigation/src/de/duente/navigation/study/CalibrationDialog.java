@@ -1,9 +1,15 @@
 package de.duente.navigation.study;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+
 import com.example.navigation.R;
 
 import de.duente.navigation.actions.CommandManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.app.Activity;
 import android.content.Intent;
 import android.view.View;
@@ -11,14 +17,17 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
+/**Teil der Kalibrierung. Stellt ein Interface für die Maximalkalibrierung eines Kanals bereit.
+ * 
+ * @author Tim Dünte
+ *
+ */
 public class CalibrationDialog extends Activity implements OnSeekBarChangeListener {
 
 	public static final String CALIBRATION_VALUES = "calibrationValues";
 	public static final String BLUETOOTH_MANAGED_BY_STARTING_ACTIVITY = "Bluetooth is managed by the activity, which starts this Activity";
 	public static final String CALIBRATING_LEFT_CHANNEL = "Boolean wenn true, dann wird links kalibriert. Sonst rechts.";
 
-	// Floatingpoint insgesammt 6 Stellen 0 Nachkomma stellen mit Prozentzeichen
-	// da hinter.
 	private static final String NUMBER_FORMAT = "%3d%%";
 
 	private int[] calibrationSettings = new int[8];
@@ -39,7 +48,7 @@ public class CalibrationDialog extends Activity implements OnSeekBarChangeListen
 		calibrationTitle = (TextView) findViewById(R.id.calibrationTitle);
 		textCurrentIntensityInPercent = (TextView) findViewById(R.id.textIntensityPercent);
 		intensity = (SeekBar) findViewById(R.id.seekBarMaxIntensity);
-		intensity.setOnSeekBarChangeListener(this);
+		
 
 		textCurrentIntensityInPercent.setText(String.format(NUMBER_FORMAT, 0));
 
@@ -55,7 +64,11 @@ public class CalibrationDialog extends Activity implements OnSeekBarChangeListen
 		if (startIntent.hasExtra(CalibrationDialog.CALIBRATION_VALUES)) {
 			calibrationSettings = startIntent
 					.getIntArrayExtra(CALIBRATION_VALUES);
+			textCurrentIntensityInPercent.setText(String.format(NUMBER_FORMAT, calibrationSettings[channel * resultCount]));
+			intensity.setProgress(calibrationSettings[channel * resultCount]);
 		}
+		
+		intensity.setOnSeekBarChangeListener(this);
 	}
 
 	@Override
@@ -90,10 +103,18 @@ public class CalibrationDialog extends Activity implements OnSeekBarChangeListen
 		super.onBackPressed();
 	}
 
+	/**Die Activity wird beendet mit der Ergebnisflag RESULT_CANCELED
+	 * 
+	 * @param view View von dem diese Methode aufgerufen wurde.
+	 */
 	public void back(View view) {
 		onBackPressed();
 	}
 
+	/**Die Activity statet den nächsten Kalibrierungsdialog.
+	 * 
+	 * @param view View von dem diese Methode aufgerufen wurde.
+	 */
 	public void forward(View view) {
 		CommandManager.stopSignal(channel);	
 		Intent intent = new Intent(this, CalibrationDialogAngle.class);
@@ -123,7 +144,7 @@ public class CalibrationDialog extends Activity implements OnSeekBarChangeListen
 	 *            View von dem diese Methode aufgerufen wurde.
 	 */
 	public void testIntensity(View view) {
-		CommandManager.setIntensityForTime(channel, 100, 5000);
+		CommandManager.setIntensityForTime(channel, 100, 30000);
 	}
 
 	@Override
@@ -131,9 +152,27 @@ public class CalibrationDialog extends Activity implements OnSeekBarChangeListen
 			boolean fromUser) {
 		textCurrentIntensityInPercent.setText(String.format(NUMBER_FORMAT, progress));		
 		CommandManager.setMaxIntensityForChannel(channel, progress);
-		CommandManager.setIntensityForTime(channel, 100, 5000);
+		
+		CommandManager.setIntensityForTime(channel, 100, 1000);
 		calibrationSettings[channel * resultCount] = progress;
 		calibrationSettings[resultCount + channel * resultCount - 1] = 100;
+	}
+	
+	public void loadLastCalibSet(View view){
+		File path = Environment.getExternalStorageDirectory();
+		File pathToLogs = new File(path, "logs");
+		
+		File calibFile =  new File(pathToLogs, "LastCalibration.txt");
+		try {
+			FileReader fileReader = new FileReader(calibFile);
+			BufferedReader bufferedReader = new BufferedReader(fileReader);
+			
+		} catch (FileNotFoundException e) {
+			//Letzte Kalibrierung konnte nicht geladen werden.
+		}
+		
+		
+		
 	}
 
 	@Override

@@ -1,8 +1,17 @@
 package de.duente.navigation.study;
+/**Diese Klasse dient der Erzeugung von beliebingen Latinsquares.
+ * 
+ * @author Tim Dünte
+ *
+ */
 public class RandomLatinSquare {
 	int[] latinSquare;
 	int n;
 
+	/**Erzeugt ein Latinsquare
+	 * 
+	 * @param n
+	 */
 	public RandomLatinSquare(int n) {
 		this.n = n;
 		latinSquare = new int[n * n];

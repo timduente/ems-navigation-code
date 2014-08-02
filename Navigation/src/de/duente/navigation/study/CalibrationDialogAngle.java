@@ -164,7 +164,7 @@ public class CalibrationDialogAngle extends Activity implements
 		for (int i = 0; i < testButtons.length; i++) {
 			if (view == testButtons[i]) {
 				CommandManager.setIntensityForTime(channel,
-						alpha[i].getProgress(), 5000);
+						alpha[i].getProgress(), 30000);
 			}
 		}
 	}
