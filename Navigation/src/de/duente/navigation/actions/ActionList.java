@@ -28,7 +28,12 @@ public class ActionList {
 	 *            IAction, die hinzugefügt werden soll.
 	 */
 	public static void addAction(Command action) {
-//		System.out.println("added");
+		for(int i = 0; i< actionList.size();i++){
+			if(actionList.get(i).startTimeStamp <= action.startTimeStamp){
+				actionList.add(i, action);
+				return;
+			}
+		}
 		actionList.add(action);
 	}
 

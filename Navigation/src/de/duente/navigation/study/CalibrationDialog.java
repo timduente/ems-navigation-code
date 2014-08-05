@@ -1,15 +1,8 @@
 package de.duente.navigation.study;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-
 import com.example.navigation.R;
-
 import de.duente.navigation.actions.CommandManager;
 import android.os.Bundle;
-import android.os.Environment;
 import android.app.Activity;
 import android.content.Intent;
 import android.view.View;
@@ -17,12 +10,15 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
-/**Teil der Kalibrierung. Stellt ein Interface für die Maximalkalibrierung eines Kanals bereit.
+/**
+ * Teil der Kalibrierung. Stellt ein Interface für die Maximalkalibrierung eines
+ * Kanals bereit.
  * 
  * @author Tim Dünte
- *
+ * 
  */
-public class CalibrationDialog extends Activity implements OnSeekBarChangeListener {
+public class CalibrationDialog extends Activity implements
+		OnSeekBarChangeListener {
 
 	public static final String CALIBRATION_VALUES = "calibrationValues";
 	public static final String BLUETOOTH_MANAGED_BY_STARTING_ACTIVITY = "Bluetooth is managed by the activity, which starts this Activity";
@@ -32,13 +28,13 @@ public class CalibrationDialog extends Activity implements OnSeekBarChangeListen
 
 	private int[] calibrationSettings = new int[8];
 	private int channel;
+	private boolean reloadCalib = false;
 	public final static int resultCount = 4;
 
 	// GUI Elemente
 	private TextView calibrationTitle;
 	private TextView textCurrentIntensityInPercent;
 	private SeekBar intensity;
-
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -48,10 +44,8 @@ public class CalibrationDialog extends Activity implements OnSeekBarChangeListen
 		calibrationTitle = (TextView) findViewById(R.id.calibrationTitle);
 		textCurrentIntensityInPercent = (TextView) findViewById(R.id.textIntensityPercent);
 		intensity = (SeekBar) findViewById(R.id.seekBarMaxIntensity);
-		
 
 		textCurrentIntensityInPercent.setText(String.format(NUMBER_FORMAT, 0));
-
 
 		if (startIntent.getBooleanExtra(CALIBRATING_LEFT_CHANNEL, true)) {
 			calibrationTitle.setText(R.string.calibrate_title_left);
@@ -64,10 +58,11 @@ public class CalibrationDialog extends Activity implements OnSeekBarChangeListen
 		if (startIntent.hasExtra(CalibrationDialog.CALIBRATION_VALUES)) {
 			calibrationSettings = startIntent
 					.getIntArrayExtra(CALIBRATION_VALUES);
-			textCurrentIntensityInPercent.setText(String.format(NUMBER_FORMAT, calibrationSettings[channel * resultCount]));
+			textCurrentIntensityInPercent.setText(String.format(NUMBER_FORMAT,
+					calibrationSettings[channel * resultCount]));
 			intensity.setProgress(calibrationSettings[channel * resultCount]);
 		}
-		
+
 		intensity.setOnSeekBarChangeListener(this);
 	}
 
@@ -94,35 +89,38 @@ public class CalibrationDialog extends Activity implements OnSeekBarChangeListen
 
 	@Override
 	public void onBackPressed() {
-		CommandManager.stopSignal(channel);	
+		CommandManager.stopSignal(channel);
 		// Ergebnisse der Kalibrierung werden in einem Intent übergeben.
 		Intent resultIntent = new Intent();
-		
+
 		resultIntent.putExtra(CALIBRATION_VALUES, calibrationSettings);
 		setResult(RESULT_CANCELED, resultIntent);
 		super.onBackPressed();
 	}
 
-	/**Die Activity wird beendet mit der Ergebnisflag RESULT_CANCELED
+	/**
+	 * Die Activity wird beendet mit der Ergebnisflag RESULT_CANCELED
 	 * 
-	 * @param view View von dem diese Methode aufgerufen wurde.
+	 * @param view
+	 *            View von dem diese Methode aufgerufen wurde.
 	 */
 	public void back(View view) {
 		onBackPressed();
 	}
 
-	/**Die Activity statet den nächsten Kalibrierungsdialog.
+	/**
+	 * Die Activity statet den nächsten Kalibrierungsdialog.
 	 * 
-	 * @param view View von dem diese Methode aufgerufen wurde.
+	 * @param view
+	 *            View von dem diese Methode aufgerufen wurde.
 	 */
 	public void forward(View view) {
-		CommandManager.stopSignal(channel);	
+		CommandManager.stopSignal(channel);
 		Intent intent = new Intent(this, CalibrationDialogAngle.class);
 		intent.putExtra(CALIBRATION_VALUES, calibrationSettings);
 		if (channel == 1) {
 			intent.putExtra(CalibrationDialog.CALIBRATING_LEFT_CHANNEL, false);
 		}
-		// intent.setFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
 		startActivityForResult(intent, TrackingTool.REQUEST_CODE_CALIBRATION);
 	}
 
@@ -133,7 +131,7 @@ public class CalibrationDialog extends Activity implements OnSeekBarChangeListen
 	 *            View von dem diese Methode aufgerufen wurde.
 	 */
 	public void stopCalibration(View view) {
-		CommandManager.stopSignal(channel);		
+		CommandManager.stopSignal(channel);
 	}
 
 	/**
@@ -150,40 +148,31 @@ public class CalibrationDialog extends Activity implements OnSeekBarChangeListen
 	@Override
 	public void onProgressChanged(SeekBar seekBar, int progress,
 			boolean fromUser) {
-		textCurrentIntensityInPercent.setText(String.format(NUMBER_FORMAT, progress));		
+		textCurrentIntensityInPercent.setText(String.format(NUMBER_FORMAT,
+				progress));
 		CommandManager.setMaxIntensityForChannel(channel, progress);
-		
-		CommandManager.setIntensityForTime(channel, 100, 1000);
-		calibrationSettings[channel * resultCount] = progress;
-		calibrationSettings[resultCount + channel * resultCount - 1] = 100;
-	}
-	
-	public void loadLastCalibSet(View view){
-		File path = Environment.getExternalStorageDirectory();
-		File pathToLogs = new File(path, "logs");
-		
-		File calibFile =  new File(pathToLogs, "LastCalibration.txt");
-		try {
-			FileReader fileReader = new FileReader(calibFile);
-			BufferedReader bufferedReader = new BufferedReader(fileReader);
-			
-		} catch (FileNotFoundException e) {
-			//Letzte Kalibrierung konnte nicht geladen werden.
+		if (!reloadCalib) {
+			CommandManager.setIntensityForTime(channel, 100, 1000);
+			calibrationSettings[resultCount + channel * resultCount - 1] = 100;
 		}
-		
-		
-		
+		calibrationSettings[channel * resultCount] = progress;
+
+	}
+
+	public void loadLastCalibSet(View view) {
+		reloadCalib = true;
+		calibrationSettings = CalibrationSaver.readCalibrationValues(calibrationSettings.length);
+		intensity.setProgress(calibrationSettings[channel * resultCount]);
+		reloadCalib = false;
 	}
 
 	@Override
 	public void onStartTrackingTouch(SeekBar seekBar) {
-		// TODO Auto-generated method stub
-		
+		//Nichts passiert.
 	}
 
 	@Override
 	public void onStopTrackingTouch(SeekBar seekBar) {
-		// TODO Auto-generated method stub
-		
+		//Nichts passiert.
 	}
 }

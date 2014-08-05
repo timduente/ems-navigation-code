@@ -157,4 +157,14 @@
         android:layout_toRightOf="@+id/spinnerParticipants"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
+    <TextView
+        android:id="@+id/textMiddle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/startSignal"
+        android:layout_centerHorizontal="true"
+        android:text="M"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textSize="40sp" />
+
 </RelativeLayout>
