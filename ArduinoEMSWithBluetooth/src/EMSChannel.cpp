@@ -159,7 +159,7 @@ void EMSChannel::setIntensity(int intensity, bool increaseDecrease,
 //		return;
 //	}
 
-	intensity = int ((maxIntensity - minIntensity) * intensity * 0.01 + 0.5f) + minIntensity;
+	intensity = int ((maxIntensity - minIntensity) * intensity * 0.01 + 0.5f)  + minIntensity;
 
 	int resistorLevel = MAX_INTENSITY;
 	if (intensity > MAX_INTENSITY) {
@@ -231,12 +231,12 @@ void EMSChannel::setIncreaseDecreaseTime(int increaseDecreaseTime) {
 
 //maxIntensity in Prozent
 void EMSChannel::setMaxIntensity(int maxIntensity){
-	this->maxIntensity = int (MAX_INTENSITY * maxIntensity / 100.0f + 0.5f);
+	this->maxIntensity = int (MAX_INTENSITY * maxIntensity * 0.01f + 0.5f);
 }
 
 //minIntensity in Prozent
 void EMSChannel::setMinIntensity(int minIntensity){
-	this->minIntensity = int (MAX_INTENSITY * minIntensity / 100.0f + 0.5f);
+	this->minIntensity = int (MAX_INTENSITY * minIntensity * 0.01f + 0.5f);
 }
 
 //---------- private ----------------------------------------------------
