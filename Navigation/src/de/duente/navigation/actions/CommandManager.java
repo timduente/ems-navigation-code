@@ -156,7 +156,7 @@ public class CommandManager implements Runnable {
 			try {
 				// Hole Kommandos, die gesendet werden müssen
 				String commands = ActionList.getCommandsToDo();
-				System.out.println(commands);
+//				System.out.println(commands);
 				if (commands.length() > 0) {
 					bluetoothConnector.sendText(commands);
 				}

@@ -59,7 +59,7 @@ public class TrackingTool extends Activity {
 	private final static int PARTICIPANT_COUNT = 30;
 
 	private final static int TIME_SIGNAL = 30000;
-	private final static String FILE_HEADER = "Teilnehmer ID;Zaehler;Intensitaets ID;X;Y;Z;Frame ID;Pitch;Sendedatum;Ankunftsdatum;Signal an;Datum Signal an;Datum Signal aus;";
+	private final static String FILE_HEADER = "Teilnehmer ID;Zaehler;Intensitaets ID;X;Y;Z;Frame ID;YAW Rotation um die Hoehenachse (Y);Sendedatum;Ankunftsdatum;Signal an;Datum Signal an;Datum Signal aus;";
 	private final static String START = "START";
 	private final static String STOP = "STOP";
 	private final static String MOTIVE_SERVER_IP = "192.168.3.9";
@@ -662,7 +662,7 @@ public class TrackingTool extends Activity {
 	 */
 	private class UDPReceiver extends AsyncTask<String, String, String> {
 		private final static int LISTENING_PORT = 9045;
-		private final static int PACKET_SIZE = 96;
+		private final static int PACKET_SIZE = 80;
 		private final static int TIMEOUT_MILLIS = 250;
 		boolean run = true;
 		boolean trackingEnabled = false;
