@@ -29,15 +29,16 @@ public class ResultViewer extends JFrame {
 	private JCheckBox[] rightBoxes = new JCheckBox[text.length];
 	private JCheckBox[] leftBoxes = new JCheckBox[text.length];
 
-	private final static float SCALE_FACTOR = 150.0f;
-	private final static int X_OFFSET = 250;
-	private final static int Z_OFFSET = 150;
-	
-	private final static int POINT_COUNT = 150;
+	public final static float SCALE_FACTOR = 150.0f;
+	public final static int X_OFFSET = 250;
+	public final static int Z_OFFSET = 150;
+
+	private final static int POINT_COUNT = 210;
 
 	private Container cp;
-	private ArrayList<TrackingDataObject> listSingles;
-	private ArrayList<TrackingDataObject> listMean;
+	private ArrayList<TrackingDataObjectList> listSingles;
+	private ArrayList<TrackingDataObjectList> listMean;
+	private ArrayList<TrackingDataObjectList> filteredList;
 
 	public ResultViewer() {
 		super("Result Viewer");
@@ -113,105 +114,27 @@ public class ResultViewer extends JFrame {
 	}
 
 	public void processFile(File file) {
-		ArrayList<TrackingDataObject> list = TrackingDataObject
+		ArrayList<TrackingDataObjectList> list = TrackingDataObject
 				.parseFileIntoSortedTrackingDataObjectList(file);
 		listSingles = list;
-		TrackingDataObject t;
-		boolean b = true;
 		for (int i = 0; i < list.size(); i++) {
-			t = list.get(i);
-
-			if (b && t.signalOn) {
-				float xOffset = t.x;
-				b = false;
-				TrackingDataObject other;
-				for (int j = 0; j < list.size(); j++) {
-					other = list.get(j);
-					if (t.count == other.count) {
-						other.x = other.x - xOffset;
-					}
-				}
-			}
-			if (!t.signalOn) {
-				b = true;
-			}
+			list.get(i).transformCoords();
 		}
 
-		listMean = new ArrayList<TrackingDataObject>();
+		listMean = new ArrayList<TrackingDataObjectList>();
 
 		for (int j = -4; j < 4; j++) {
-			ArrayList<TrackingDataObject> sum = new ArrayList<TrackingDataObject>();
-			int lastCount = -4;
 
-			for (int i = 0; i < list.size(); i++) {
-				t = list.get(i);
-				int sumIndex = 0;
-
-				if (t.intensity == j && t.signalOn && lastCount == -4) {
-					lastCount = -2;
-				}
-				if (t.intensity == j && !t.signalOn && lastCount == -3) {
-					lastCount = -5;
-				}
-				if (t.intensity == j && t.signalOn && lastCount == -5) {
-					lastCount = -1;
-				}
-
-				if (lastCount == -2) {
-					while (sumIndex < POINT_COUNT) {
-						TrackingDataObject u = new TrackingDataObject(t);
-						u.count = 1;
-						sum.add(u);
-						i++;
-						t = list.get(i);
-						sumIndex++;
-					}
-					lastCount = -3;
-				} else if (lastCount == -1) {
-					while (sumIndex < POINT_COUNT && i < list.size()) {
-						TrackingDataObject u = sum.get(sumIndex);
-						// if(sumIndex == 0){
-						if (u.x == 0.0f && u.z == 0.0f && u.y <= 1.0f) {
-							u.x = t.x;
-							u.z = t.z;
-							u.count = 1;
-						} else if (t.x != 0.0f || t.y != 0.0f || t.z != 0.0f) {
-							u.x = u.x + t.x;
-							u.z = u.z + t.z;
-							u.count++;
-						}
-						// }
-						// else{
-						// u.x = u.x + t.x;
-						// u.z = u.z + t.z;
-						// u.count++;
-						// }
-						System.out.println("U: " + u.x + " SUM: "
-								+ sum.get(sumIndex).x + "Count: "
-								+ sum.get(sumIndex).count);
-						sumIndex++;
-						i++;
-						if (i < list.size()) {
-							t = list.get(i);
-						}
-					}
-					lastCount = -3;
+			ArrayList<TrackingDataObjectList> sameID = new ArrayList<TrackingDataObjectList>();
+			for (int i = 0; i < listSingles.size(); i++) {
+				if (listSingles.get(i).id == j) {
+					sameID.add(listSingles.get(i));
 				}
 			}
-
-			for (int i = 0; i < sum.size(); i++) {
-				sum.get(i).x = sum.get(i).x / (float) sum.get(i).count;
-				sum.get(i).z = sum.get(i).z / (float) sum.get(i).count;
-				System.out.println(" SUM: " + sum.get(i).x);
-				listMean.add(sum.get(i));
-			}
-			System.out.println("Size of SumList: " + sum.size());
-
+			System.out.println("id: " + j + "Size von SameID: "+  sameID.size());
+			listMean.add(TrackingDataObjectList.createMeanList(sameID));
 		}
-
 		repaint();
-		System.out.println(list.size());
-
 	}
 
 	private Color chooseColor(int intensity) {
@@ -267,6 +190,10 @@ public class ResultViewer extends JFrame {
 				* 180.0 / Math.PI;
 	}
 
+	private void generateFilteredList() {
+
+	}
+
 	@Override
 	public void paint(Graphics g) {
 		super.paint(g);
@@ -293,76 +220,20 @@ public class ResultViewer extends JFrame {
 		}
 
 		if (listSingles != null && showSingles.isSelected()) {
-			TrackingDataObject t;
-			boolean signalEnd = false;
 			for (int i = 0; i < listSingles.size(); i++) {
-				t = listSingles.get(i);
-				Color color = chooseColor(t.intensity);
-				if (color != null) {
-					g.setColor(color);
-
-					g.drawLine(
-							(int) (listSingles.get(i).x * SCALE_FACTOR + X_OFFSET),
-							(int) (listSingles.get(i).z * SCALE_FACTOR)
-									+ Z_OFFSET,
-							(int) (listSingles.get(i).x * SCALE_FACTOR)
-									+ X_OFFSET,
-							(int) (listSingles.get(i).z * SCALE_FACTOR)
-									+ Z_OFFSET);
-
-					if (signalEnd && listSingles.get(i).signalOn) {
-						signalEnd = false;
-					}
-
-					if (!listSingles.get(i).signalOn && !signalEnd) {
-						signalEnd = true;
-						g.setColor(Color.DARK_GRAY);
-
-						g.fillRect((int) (listSingles.get(i).x * SCALE_FACTOR)
-								+ X_OFFSET - 2,
-								(int) (listSingles.get(i).z * SCALE_FACTOR)
-										+ Z_OFFSET - 2, 5, 5);
-					}
-				}
+				listSingles.get(i).paint(g, chooseColor(listSingles.get(i).id));
 			}
+			
 		}
-
+		//
 		if (listMean != null && showMean.isSelected()) {
-			TrackingDataObject t;
-			boolean signalEnd = false;
+			System.out.println("Size: " + listMean.size());
 			for (int i = 0; i < listMean.size(); i++) {
-				t = listMean.get(i);
-				Color color = chooseColor(t.intensity);
-				if (color != null) {
-					g.setColor(color);
-
-					if (signalEnd && listMean.get(i).signalOn) {
-						signalEnd = false;
-					}
-
-					g.fillRect((int) (listMean.get(i).x * SCALE_FACTOR)
-							+ X_OFFSET - 1,
-							(int) (listMean.get(i).z * SCALE_FACTOR) + Z_OFFSET
-									- 1, 3, 3);
-					if (!listMean.get(i).signalOn && !signalEnd) {
-						signalEnd = true;
-						g.setColor(Color.DARK_GRAY);
-
-						double angle = getAngle(listMean.get(0),
-								listMean.get(i - 1));
-
-						g.drawString("Winkel für: " + t.intensity + " = "
-								+ angle, 1000, 500 + 30 * t.intensity);
-
-						g.fillRect((int) (listMean.get(i).x * SCALE_FACTOR)
-								+ X_OFFSET - 2,
-								(int) (listMean.get(i).z * SCALE_FACTOR)
-										+ Z_OFFSET - 2, 5, 5);
-					}
-
-				}
+//				System.out.println("Size of List with id: "
+//						+ listMean.get(i).id + "Size: "
+//						+ listMean.get(i).dataList.size());
+				listMean.get(i).paint(g, chooseColor(listMean.get(i).id));
 			}
 		}
-
 	}
 }
