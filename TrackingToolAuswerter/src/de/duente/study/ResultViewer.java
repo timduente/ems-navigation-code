@@ -225,6 +225,10 @@ public class ResultViewer extends JFrame {
 			}
 			
 		}
+		
+		
+		
+		
 		//
 		if (listMean != null && showMean.isSelected()) {
 			System.out.println("Size: " + listMean.size());
@@ -233,7 +237,11 @@ public class ResultViewer extends JFrame {
 //						+ listMean.get(i).id + "Size: "
 //						+ listMean.get(i).dataList.size());
 				listMean.get(i).paint(g, chooseColor(listMean.get(i).id));
+				g.drawString("Winkel für: " + listMean.get(i).id + " = "+
+					0 , 1000, 500 + 30 * listMean.get(i).id);
 			}
+			
+			
 		}
 	}
 }
