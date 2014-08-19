@@ -82,6 +82,15 @@
             android:name="de.duente.navigation.study.CalibrationDialogAngle"
             android:label="@string/title_activity_calibration_dialog_angle" >
         </activity>
+        <activity
+            android:name="de.duente.navigation.EMSNavigation"
+            android:label="@string/title_activity_emsnavigation" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

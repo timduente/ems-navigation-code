@@ -73,7 +73,7 @@ public class CalibrationDialogAngle extends Activity implements
 		labels[1] = (TextView) findViewById(R.id.textView5);
 		labels[2] = (TextView) findViewById(R.id.textView6);
 
-		testButtons[0] = (Button) findViewById(R.id.button1);
+		testButtons[0] = (Button) findViewById(R.id.buttonLeftOn);
 		testButtons[1] = (Button) findViewById(R.id.button3);
 		testButtons[2] = (Button) findViewById(R.id.button5);
 

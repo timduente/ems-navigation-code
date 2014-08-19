@@ -230,6 +230,13 @@ public class TrackingTool extends Activity {
 			alertBluetoothConnectionFailed.show();
 		}
 	}
+	
+	public void redo(View view){
+		if(participant.isInitialized()){
+			participant.redo();
+			updateView();
+		}
+	}
 
 	private void updateView() {
 

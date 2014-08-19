@@ -124,6 +124,12 @@ public class Participant {
 			actualLevel++;
 		}
 	}
+	
+	public void redo(){
+		if(actualLevel > 0){
+			actualLevel--;
+		}
+	}
 
 	private void initialiazeRandomList() {
 		Level.intensitys = calibratedIntensitys;

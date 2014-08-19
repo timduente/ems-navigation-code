@@ -33,5 +33,6 @@
     <string name="button_back">Zurück</string>
     <string name="button_test">Testen</string>
     <string name="button_stop">Stop</string>
+    <string name="title_activity_emsnavigation">EMSNavigation</string>
 
 </resources>
