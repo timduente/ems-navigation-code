@@ -1,4 +1,4 @@
-package de.duente.navigation.actions;
+package de.duente.navigation.commands;
 
 /**
  * Diese Klasse repraesentiert eine Option. Optionen haben laenger Kommandos als

@@ -10,8 +10,8 @@ import org.json.JSONException;
 
 import com.example.navigation.*;
 
-import de.duente.navigation.actions.CommandManager;
 import de.duente.navigation.bluetooth.BluetoothConnector;
+import de.duente.navigation.commands.CommandManager;
 import de.duente.navigation.route.Route;
 import android.location.Location;
 import android.location.LocationListener;

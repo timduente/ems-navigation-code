@@ -1,7 +1,8 @@
 package de.duente.navigation.study;
 
 import com.example.navigation.R;
-import de.duente.navigation.actions.CommandManager;
+
+import de.duente.navigation.commands.CommandManager;
 import android.os.Bundle;
 import android.app.Activity;
 import android.app.AlertDialog;

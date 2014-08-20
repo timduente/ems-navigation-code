@@ -1,4 +1,4 @@
-package de.duente.navigation.actions;
+package de.duente.navigation.commands;
 
 import java.util.ArrayList;
 
@@ -10,15 +10,15 @@ import java.util.ArrayList;
  * 
  */
 
-public class ActionList {
-	private static ArrayList<Command> actionList = new ArrayList<Command>();
+public class CommandList {
+	private static ArrayList<Command> commandList = new ArrayList<Command>();
 
 	/**
-	 * Löscht alle Elemente in der ActionList.
+	 * Löscht alle Elemente in der CommandList.
 	 * 
 	 */
-	public synchronized static void clearActionList() {
-		actionList = new ArrayList<Command>();
+	public synchronized static void clearCommandList() {
+		commandList = new ArrayList<Command>();
 	}
 
 	/**
@@ -28,13 +28,13 @@ public class ActionList {
 	 *            IAction, die hinzugefügt werden soll.
 	 */
 	public synchronized static void addAction(Command action) {
-		for(int i = 0; i< actionList.size();i++){
-			if(actionList.get(i).startTimeStamp <= action.startTimeStamp){
-				actionList.add(i, action);
+		for(int i = 0; i< commandList.size();i++){
+			if(commandList.get(i).startTimeStamp <= action.startTimeStamp){
+				commandList.add(i, action);
 				return;
 			}
 		}
-		actionList.add(action);
+		commandList.add(action);
 	}
 
 	/**
@@ -44,16 +44,16 @@ public class ActionList {
 	 *            IAction, die entfernt werden soll.
 	 */
 	public synchronized static void removeAction(Command action) {
-		actionList.remove(action);
+		commandList.remove(action);
 	}
 
 	/**
-	 * Gibt die Anzahl der Elemente in der ActionList zurück.
+	 * Gibt die Anzahl der Elemente in der CommandList zurück.
 	 * 
 	 * @return Anzahl der Elemente in der Liste.
 	 */
 	public static int getSize() {
-		return actionList.size();
+		return commandList.size();
 	}
 
 	/**
@@ -64,7 +64,7 @@ public class ActionList {
 	 * @return IAction oder null.
 	 */
 	public synchronized static Command getAction(int index) {
-		return actionList.get(index);
+		return commandList.get(index);
 	}
 
 	/**
@@ -78,12 +78,12 @@ public class ActionList {
 	 */
 	public synchronized static String getCommandsToDo(long actualTime) {
 		StringBuilder commands = new StringBuilder();
-		for (int i = actionList.size() - 1; i >= 0; i--) {
-			Command action = actionList.get(i);
+		for (int i = commandList.size() - 1; i >= 0; i--) {
+			Command action = commandList.get(i);
 			if (action != null && action.check(actualTime)) {
 				commands.append(action.getCommand());
 				commands.append(';');
-				actionList.remove(i);
+				commandList.remove(i);
 			}
 		}
 		return commands.toString();
@@ -99,12 +99,12 @@ public class ActionList {
 	 */
 	public synchronized static String getCommandsToDo() {
 		StringBuilder commands = new StringBuilder();
-		for (int i = actionList.size() - 1; i >= 0; i--) {
-			Command action = actionList.get(i);
+		for (int i = commandList.size() - 1; i >= 0; i--) {
+			Command action = commandList.get(i);
 			if (action != null && action.check()) {
 				commands.append(action.getCommand());
 				commands.append(';');
-				actionList.remove(i);
+				commandList.remove(i);
 			}
 		}
 		return commands.toString();

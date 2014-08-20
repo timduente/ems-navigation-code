@@ -1,4 +1,4 @@
-package de.duente.navigation.actions;
+package de.duente.navigation.commands;
 
 /**
  * Diese Klasse ist eine Aktion und enthält Informationen zu wann diese

@@ -2,9 +2,11 @@ package de.duente.navigation;
 
 import java.io.IOException;
 import java.io.InputStream;
+
 import com.example.navigation.R;
-import de.duente.navigation.actions.CommandManager;
+
 import de.duente.navigation.bluetooth.BluetoothConnector;
+import de.duente.navigation.commands.CommandManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
@@ -130,7 +132,7 @@ public class Bluetooth_Console extends Activity {
 		millis = startTime;
 
 		if (checkRTT) {
-			CommandManager.setIntensityForTime(0, 100, 1000);
+			CommandManager.setIntensityForTime(0, 100, 10000);
 			//ActionList.addAction(new Action());
 		} else {
 			CommandManager.setPulseForTime(0, 30, startTime, 3, 1000, 1000);

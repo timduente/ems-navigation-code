@@ -1,4 +1,4 @@
-package de.duente.navigation.actions;
+package de.duente.navigation.commands;
 
 /**
  * Abstrakte Oberklasse für alle Kommandos und Optionen. Beeinhaltet Informationen zum Start und den Befehl.

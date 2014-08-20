@@ -1,4 +1,4 @@
-package de.duente.navigation.actions;
+package de.duente.navigation.commands;
 
 import java.io.IOException;
 
@@ -27,7 +27,7 @@ public class CommandManager implements Runnable {
 	 *            Potentiometers.
 	 */
 	public static void setStepTimeForChannel(int channel, int stepTime) {
-		ActionList.addAction(new Option(System.currentTimeMillis(),
+		CommandList.addAction(new Option(System.currentTimeMillis(),
 				Option.OPTION.SET_CHANGE_TIME, channel, stepTime));
 	}
 
@@ -40,7 +40,7 @@ public class CommandManager implements Runnable {
 	 *            maximale Intensitaet in Prozent 0-100
 	 */
 	public static void setMaxIntensityForChannel(int channel, int max) {
-		ActionList.addAction(new Option(System.currentTimeMillis(),
+		CommandList.addAction(new Option(System.currentTimeMillis(),
 				Option.OPTION.SET_CALIBRATION_MAXIMUM, channel, max));
 	}
 
@@ -53,7 +53,7 @@ public class CommandManager implements Runnable {
 	 *            minimale Intensitaet in Prozent 0-100
 	 */
 	public static void setMinIntensityForChannel(int channel, int min) {
-		ActionList.addAction(new Option(System.currentTimeMillis(),
+		CommandList.addAction(new Option(System.currentTimeMillis(),
 				Option.OPTION.SET_CALIBRATION_MINIMUM, channel, min));
 	}
 
@@ -70,7 +70,7 @@ public class CommandManager implements Runnable {
 	 */
 	public static void setIntensityForTime(int channel, int intensity,
 			int onTime) {
-		ActionList.addAction(new Action(System.currentTimeMillis(), channel,
+		CommandList.addAction(new Action(System.currentTimeMillis(), channel,
 				intensity, onTime));
 	}
 
@@ -81,7 +81,7 @@ public class CommandManager implements Runnable {
 	 *            Kanal
 	 */
 	public static void stopSignal(int channel) {
-		ActionList.addAction(new Action(System.currentTimeMillis(), channel, 0,
+		CommandList.addAction(new Action(System.currentTimeMillis(), channel, 0,
 				0));
 	}
 
@@ -101,7 +101,7 @@ public class CommandManager implements Runnable {
 	@Deprecated
 	public static void setIntensityForTime(int channel, int intensity,
 			long startTime, int onTime) {
-		ActionList.addAction(new Action(startTime, channel, intensity, onTime));
+		CommandList.addAction(new Action(startTime, channel, intensity, onTime));
 	}
 
 	/**
@@ -124,7 +124,7 @@ public class CommandManager implements Runnable {
 	public static void setPulseForTime(int channel, int intensity,
 			long startTime, int count, int highTime, int lowTime) {
 		for (int i = 0; i < count; i++) {
-			ActionList.addAction(new Action(startTime + i
+			CommandList.addAction(new Action(startTime + i
 					* (highTime + lowTime), channel, intensity, highTime));
 		}
 	}
@@ -155,7 +155,7 @@ public class CommandManager implements Runnable {
 		while (run) {
 			try {
 				// Hole Kommandos, die gesendet werden müssen
-				String commands = ActionList.getCommandsToDo();
+				String commands = CommandList.getCommandsToDo();
 //				System.out.println(commands);
 				if (commands.length() > 0) {
 					bluetoothConnector.sendText(commands);

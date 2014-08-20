@@ -8,10 +8,12 @@ import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+
 import com.example.navigation.R;
+
 import de.duente.navigation.Calibration;
-import de.duente.navigation.actions.CommandManager;
 import de.duente.navigation.bluetooth.BluetoothConnector;
+import de.duente.navigation.commands.CommandManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
