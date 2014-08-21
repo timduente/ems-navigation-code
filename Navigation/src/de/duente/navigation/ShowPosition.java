@@ -12,6 +12,7 @@ import com.example.navigation.*;
 
 import de.duente.navigation.bluetooth.BluetoothConnector;
 import de.duente.navigation.commands.CommandManager;
+import de.duente.navigation.route.GoogleNavigationApiJsonParser;
 import de.duente.navigation.route.Route;
 import android.location.Location;
 import android.location.LocationListener;
@@ -382,7 +383,7 @@ public class ShowPosition extends Activity implements LocationListener {
 
 			route = new Route();
 			try {
-				GoogleNavigationAPI_JSON_Parser parser = new GoogleNavigationAPI_JSON_Parser(
+				GoogleNavigationApiJsonParser parser = new GoogleNavigationApiJsonParser(
 						result);
 				route = parser.parseJsonStringInRoute();
 

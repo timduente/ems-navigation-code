@@ -28,7 +28,7 @@ public class Option extends Command {
 		super(startTimeStamp, "_" + option.option() + "[" + channel + ","
 				+ value + "]");
 	}
-
+	
 	/**
 	 * In dieser Enumeration werden alle Optionen deklariert.
 	 * 

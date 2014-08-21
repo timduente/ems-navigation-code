@@ -22,29 +22,29 @@ public class CommandList {
 	}
 
 	/**
-	 * Fügt ein IActionobjekt zur Liste hinzu.
+	 * Fügt ein Command OPbjekt zur Liste hinzu.
 	 * 
-	 * @param action
-	 *            IAction, die hinzugefügt werden soll.
+	 * @param command
+	 *            Command, die hinzugefügt werden soll.
 	 */
-	public synchronized static void addAction(Command action) {
+	public synchronized static void addCommand(Command command) {
 		for(int i = 0; i< commandList.size();i++){
-			if(commandList.get(i).startTimeStamp <= action.startTimeStamp){
-				commandList.add(i, action);
+			if(commandList.get(i).startTimeStamp <= command.startTimeStamp){
+				commandList.add(i, command);
 				return;
 			}
 		}
-		commandList.add(action);
+		commandList.add(command);
 	}
 
 	/**
-	 * Entfernt ein IAction Objekt aus der Liste.
+	 * Entfernt ein Command Objekt aus der Liste.
 	 * 
-	 * @param action
-	 *            IAction, die entfernt werden soll.
+	 * @param command
+	 *            Command, die entfernt werden soll.
 	 */
-	public synchronized static void removeAction(Command action) {
-		commandList.remove(action);
+	public synchronized static void removeCommand(Command command) {
+		commandList.remove(command);
 	}
 
 	/**
@@ -61,9 +61,9 @@ public class CommandList {
 	 * 
 	 * @param index
 	 *            Position des Elements in der Liste
-	 * @return IAction oder null.
+	 * @return Command oder null.
 	 */
-	public synchronized static Command getAction(int index) {
+	public synchronized static Command getCommand(int index) {
 		return commandList.get(index);
 	}
 

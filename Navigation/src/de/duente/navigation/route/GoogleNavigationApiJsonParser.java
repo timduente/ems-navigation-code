@@ -1,4 +1,4 @@
-package de.duente.navigation;
+package de.duente.navigation.route;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -7,9 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import de.duente.navigation.route.GeoPoint;
-import de.duente.navigation.route.Route;
-import de.duente.navigation.route.Step;
+import de.duente.navigation.ShowPosition;
 
 /**
  * Diese Klasse parst den JSON String aus der Google Api wandelt den JSON-String
@@ -20,7 +18,7 @@ import de.duente.navigation.route.Step;
  * 
  */
 
-public class GoogleNavigationAPI_JSON_Parser {
+public class GoogleNavigationApiJsonParser {
 	private final static String JSON_ENTRY_STATUS = "status";
 	private final static String JSON_ENTRY_ROUTES = "routes";
 	private final static String JSON_ENTRY_COPYRIGHTS = "copyrights";
@@ -51,7 +49,7 @@ public class GoogleNavigationAPI_JSON_Parser {
 	 * @throws JSONException
 	 *             falls der String ungültig ist.
 	 */
-	public GoogleNavigationAPI_JSON_Parser(String jsonString)
+	public GoogleNavigationApiJsonParser(String jsonString)
 			throws JSONException {
 		jsonObj = new JSONObject(jsonString);
 	}
