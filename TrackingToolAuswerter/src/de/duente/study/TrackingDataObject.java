@@ -16,6 +16,18 @@ public class TrackingDataObject implements Comparable<TrackingDataObject> {
 	String dateReceive;
 
 	private int mergeCount = 1;
+	
+	public TrackingDataObject(float x, float z, 
+			float yaw) {
+		this.x = x;
+		this.y = 0.0f;
+		this.z = z;
+		this.yaw = yaw;
+		this.frameNumber = 0;
+		this.signalOn = true;
+		this.dateSend = "";
+		this.dateReceive = "";
+	}
 
 	public TrackingDataObject(float x, float y, float z, long frameNumber,
 			float yaw, String dateSend, String dateReceive, boolean signalOn) {
@@ -146,6 +158,10 @@ public class TrackingDataObject implements Comparable<TrackingDataObject> {
 		x = x / mergeCount;
 		y = y / mergeCount;
 		yaw = yaw / mergeCount;
+	}
+	
+	public String toString(){
+		return "x: " + x + "; z: " + z;
 	}
 
 }
