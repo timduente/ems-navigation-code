@@ -5,14 +5,30 @@ import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.Collections;
 
+/**
+ * Dieses Objekt repräsentiert eine Liste von geparsten Objekten. Alle Objekte
+ * einer Liste haben die gleiche Id und den gleichen count Wert. Jede Liste
+ * gehört zu einem Gehversuch.
+ * 
+ * @author Tim Dünte
+ * 
+ */
 public class TrackingDataObjectList implements
 		Comparable<TrackingDataObjectList> {
-	int id;
-	int count;
-	int participantId;
-	int specialPaintIndex = 0;
+	private int id;
+	private int count;
+	private int participantId;
+	private int specialPaintIndex = 0;
 
-	ArrayList<TrackingDataObject> dataList;
+	private ArrayList<TrackingDataObject> dataList;
+	
+	public int getID(){
+		return id;
+	}
+	
+	public int getCount(){
+		return count;
+	}
 
 	public TrackingDataObjectList(int id, int count, int participantId) {
 		this.id = id;
@@ -98,21 +114,20 @@ public class TrackingDataObjectList implements
 				dataList.remove(i);
 			}
 		}
-		
-		// Abschneiden von defekten Werten, bei denen die Positionsdaten nicht getrackt wurden und das Signal aus war. Also Startwerte.
+
+		// Abschneiden von defekten Werten, bei denen die Positionsdaten nicht
+		// getrackt wurden und das Signal aus war. Also Startwerte.
 		for (int i = dataList.size() - 1; i >= 0; i--) {
 			if (!dataList.get(i).isPositionValid() && !dataList.get(i).signalOn) {
 				dataList.remove(i);
 			}
 		}
-		
-		
-		
+
 		for (int i = 0; i < dataList.size(); i++) {
 			TrackingDataObject tdo = dataList.get(i);
 			if (tdo.isPositionValid()
 					&& (tdo.x > 3.0f || tdo.x < 0.0f || tdo.z < 1.0f || tdo.z > 4.5f)) {
-				//System.err.println("whats up");
+				// System.err.println("whats up");
 				dataList.subList(i, dataList.size()).clear();
 				break;
 			}
@@ -135,9 +150,10 @@ public class TrackingDataObjectList implements
 					sumX = sumX + dataList.dataList.get(i + j).x;
 					sumZ = sumZ + dataList.dataList.get(i + j).z;
 				} else {
-					
+
 					fail++;
-					//System.out.println("Fail:" + fail + "Info: "+dataList.dataList.get(i+j).signalOn);
+					// System.out.println("Fail:" + fail +
+					// "Info: "+dataList.dataList.get(i+j).signalOn);
 				}
 			}
 			tDO = new TrackingDataObject(sumX / (n - fail), sumZ / (n - fail),

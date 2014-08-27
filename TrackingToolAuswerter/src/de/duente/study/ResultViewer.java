@@ -26,7 +26,8 @@ public class ResultViewer extends JFrame {
 	private JButton loadFile = new JButton("Datei öffnen");
 	private JCheckBox showSingles = new JCheckBox("Singles anzeigen");
 	private JCheckBox showMean = new JCheckBox("Mittelwert anzeigen");
-	private JCheckBox showFiltered = new JCheckBox("Gefilterte Werte");
+	private JCheckBox showFilteredSingle = new JCheckBox("Gefilterte Singles");
+	private JCheckBox showFilteredMean = new JCheckBox("Gefilterte Mittel");
 	private JSlider slideAngles = new JSlider(0, 500, 0);
 	private JLabel slideLabel = new JLabel("Winkel ziehen");
 
@@ -41,15 +42,20 @@ public class ResultViewer extends JFrame {
 	public final static int X_OFFSET = 250;
 	public final static int Z_OFFSET = 150;
 
-	private final static int POINT_COUNT = 210;
+	private FileWriter singleAngleWriter;
 
 	private Container cp;
 	private ArrayList<TrackingDataObjectList> listSingles;
 	private ArrayList<TrackingDataObjectList> listMean;
-	private ArrayList<TrackingDataObjectList> filteredList;
+	private ArrayList<TrackingDataObjectList> listFilteredSingles;
+	private ArrayList<TrackingDataObjectList> listFilteredMean;
+
+	private static final String SINGLE_ANGLE_HEAD = "ID;Count;Angle per Meter;\n";
+	private static final String SEPERATOR = ";";
+	private static final String TITEL = "Result Viewer";
 
 	public ResultViewer() {
-		super("Result Viewer");
+		super(TITEL);
 		this.setSize(1024, 768);
 		this.setVisible(true);
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -97,10 +103,15 @@ public class ResultViewer extends JFrame {
 		showMean.setBounds(160, 20, 140, 20);
 		cp.add(showMean);
 
-		showFiltered.addActionListener(repaintActionListener);
+		showFilteredSingle.addActionListener(repaintActionListener);
 
-		showFiltered.setBounds(160, 40, 140, 20);
-		cp.add(showFiltered);
+		showFilteredSingle.setBounds(160, 40, 140, 20);
+		cp.add(showFilteredSingle);
+		
+		showFilteredMean.addActionListener(repaintActionListener);
+
+		showFilteredMean.setBounds(160, 60, 140, 20);
+		cp.add(showFilteredMean);
 
 		slideAngles.setBounds(100, 80, slideAngles.getMaximum(), 20);
 
@@ -139,116 +150,121 @@ public class ResultViewer extends JFrame {
 
 	public static void main(String... args) {
 		new ResultViewer();
-		//System.out.println("TESTWINKEL: " + Vector.getAngleBetweenVecs(new Vector(1.0f, 1.0f), new Vector(1.0f, 0.0f))/(new Vector(1.0f, 1.0f).length + 1.0f));
 	}
 
-	private void writeAngleDataToFile(int count, int id, float anglePerMeter,
-			String pathName) {
-
-		File f = new File(pathName, "Winkel.txt");
-		System.out.println("Id: " + id + " Angle: " + anglePerMeter);
+	private void writeSingleAngleDataToFile(
+			float anglePerMeter, TrackingDataObjectList tDOList) {
+		// System.out.println("Id: " + id + " Angle: " + anglePerMeter);
 		try {
-			FileWriter fw = new FileWriter(f, true);
-			fw.append("Id: " + id + ", Count: " + count +", Angle: " + anglePerMeter + "\n");
-			fw.close();
+
+			singleAngleWriter.append(tDOList.getID() + SEPERATOR + tDOList.getCount() + SEPERATOR
+					+ anglePerMeter + SEPERATOR + "\n");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public void processFile(File file) {
+		this.setTitle(TITEL + " - " + file.getAbsolutePath());
+		File file_single_angle = new File(file.getParent(), "Winkel_einzel.csv");
+
+		try {
+			singleAngleWriter = new FileWriter(file_single_angle);
+			singleAngleWriter.write(SINGLE_ANGLE_HEAD);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		// System.out.println(f.getAbsolutePath());
-	}
-
-	public void processFile(File file) {
 		ArrayList<TrackingDataObjectList> list = TrackingDataObject
 				.parseFileIntoSortedTrackingDataObjectList(file);
 		listSingles = list;
-		
-		
+
 		for (int i = 0; i < list.size(); i++) {
 			listSingles.get(i).transformCoords();
 			ArrayList<Vector> vectors1 = list.get(i).getVectors();
-			printAngleForVectorList(vectors1, list.get(i).id, list.get(i).count, file );
+			printAngleForVectorList(vectors1, list.get(i));
 		}
 
 		listMean = new ArrayList<TrackingDataObjectList>();
-		filteredList = new ArrayList<TrackingDataObjectList>();
+		listFilteredMean = new ArrayList<TrackingDataObjectList>();
 		for (int j = -4; j < 4; j++) {
 
 			ArrayList<TrackingDataObjectList> sameID = new ArrayList<TrackingDataObjectList>();
 			for (int i = 0; i < listSingles.size(); i++) {
-				if (listSingles.get(i).id == j) {
+				if (listSingles.get(i).getID() == j) {
 					sameID.add(listSingles.get(i));
 				}
 			}
 			System.out
 					.println("id: " + j + "Size von SameID: " + sameID.size());
 			listMean.add(TrackingDataObjectList.createMeanList(sameID));
-//			filteredList.add(TrackingDataObjectList.generateNMeanFilteredList(
-//					listMean.get(listMean.size() - 1), 41));
+			listFilteredMean.add(TrackingDataObjectList
+					.generateNMeanFilteredList(
+							listMean.get(listMean.size() - 1), 41));
 		}
-		
-		for(int i = 0; i< listSingles.size(); i++){
-			filteredList.add(TrackingDataObjectList.generateNMeanFilteredList(
-					listSingles.get(i), 41));
+		listFilteredSingles = new ArrayList<TrackingDataObjectList>();
+		for (int i = 0; i < listSingles.size(); i++) {
+			listFilteredSingles.add(TrackingDataObjectList
+					.generateNMeanFilteredList(listSingles.get(i), 41));
+		}
 
-			
-			ArrayList<Vector> vectors = filteredList.get(i).getVectors();
-			System.out.println("Größe von Vektorliste : "+ vectors.size() + " Fuer ID: "+ filteredList.get(i).id + "Groeße der Liste. " + filteredList.get(i).dataList.size());
-			printAngleForVectorList(vectors, listSingles.get(i).id,listSingles.get(i).count, file);
+		try {
+			singleAngleWriter.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		repaint();
 	}
-	
-	private void printAngleForVectorList(ArrayList<Vector> vectors, int id, int count, File file){
-		
+
+	private void printAngleForVectorList(ArrayList<Vector> vectors, TrackingDataObjectList tDOList) {
+		// System.out.println("Laenge der Vektorliste: " + vectors.size());
+
 		float anglePerMeter = 0.0f;
-		int failCount = 0;
 		for (int j = 0; j < vectors.size() - 1; j++) {
 			float angle = Vector.getAngleBetweenVecs(vectors.get(j),
 					vectors.get(j + 1));
 
-//			if(list.get(i).id == -4)
-//			System.out.println("Winkel: " + angle + vectors.get(j).toString() + vectors.get(j+1).toString() + ";" + filteredList.get(i).dataList.get(0).toString() + ";" + filteredList.get(i).dataList.get(1)+";" + filteredList.get(i).dataList.get(2));
-//			
-			
-			if (Float.isNaN(angle)
-					|| Float.isNaN(vectors.get(j).length)
-					|| Float.isNaN(vectors.get(j + 1).length)) {
-				failCount++;
-				System.out.println("Winkel ist NAN. \n"
+			// if(list.get(i).id == -4)
+			// System.out.println("Winkel: " + angle + vectors.get(j).toString()
+			// + vectors.get(j+1).toString() + ";" +
+			// filteredList.get(i).dataList.get(0).toString() + ";" +
+			// filteredList.get(i).dataList.get(1)+";" +
+			// filteredList.get(i).dataList.get(2));
+			//
+
+			if (Float.isNaN(angle) || Float.isNaN(vectors.get(j).getLength())
+					|| Float.isNaN(vectors.get(j + 1).getLength())) {
+				System.err.println("Winkel ist NAN. \n"
 						+ vectors.get(j).toString() + "\n"
 						+ vectors.get(j + 1).toString() + "\n");
 			} else {
-				anglePerMeter = anglePerMeter
-						+ angle
-						;
+				anglePerMeter = anglePerMeter + angle;
 			}
 		}
+
 		float length = 0.0f;
 		for (int j = 0; j < vectors.size() - 1; j++) {
-			if(Float.isNaN(length)){
-				System.out.println("Laenge is NAN" +j  + " ; "+vectors.get(j));
+			if (Float.isNaN(length)) {
+				System.out
+						.println("Laenge is NAN" + j + " ; " + vectors.get(j));
 			}
-			length = length + vectors.get(j).length;
+			length = length + vectors.get(j).getLength();
 		}
-		
-//		if(filteredList.get(i).id == 0)
-//			System.out.println("winkel pro meter vorher: "+anglePerMeter);
-		anglePerMeter = anglePerMeter /length;
-//		if(filteredList.get(i).id == 0)
-//			System.out.println("winkel pro meter nachher: "+anglePerMeter);
-		writeAngleDataToFile(count, id,
-				anglePerMeter, file.getParent());
-		
-		
-	}
-	
-	
 
-	private Color chooseColor(int intensity) {
+		// System.out.println("winkel pro meter vorher: "+anglePerMeter +
+		// ", Laenge: "+ length);
+		anglePerMeter = anglePerMeter / length;
+		// System.out.println("winkel pro meter nachher: "+anglePerMeter);
+		writeSingleAngleDataToFile(anglePerMeter, tDOList);
+
+	}
+
+	private Color chooseColor(TrackingDataObjectList tDOList) {
 		Color color = null;
-		switch (intensity) {
+		switch (tDOList.getID()) {
 		case (-4):
 			if (leftBoxes[3].isSelected()) {
 				color = Color.BLUE;
@@ -293,16 +309,6 @@ public class ResultViewer extends JFrame {
 		return color;
 	}
 
-	private double getAngle(TrackingDataObject startData,
-			TrackingDataObject endData) {
-		return Math.atan2(endData.z - startData.z, endData.x - startData.x)
-				* 180.0 / Math.PI;
-	}
-
-	private void generateFilteredList() {
-
-	}
-
 	@Override
 	public void paint(Graphics g) {
 		super.paint(g);
@@ -328,48 +334,44 @@ public class ResultViewer extends JFrame {
 					X_OFFSET + 20, Z_OFFSET + (int) (i * SCALE_FACTOR));
 		}
 
-		// for (int i = 0; i < 3; i++) {
-		// g.drawLine(X_OFFSET - 10, getHeight() / 2 + 150
-		// + (int) (SCALE_FACTOR * i), X_OFFSET + 10, getHeight() / 2
-		// + Z_OFFSET + (int) (SCALE_FACTOR * i));
-		// g.drawLine(X_OFFSET - 10, getHeight() / 2 + 150
-		// - (int) (SCALE_FACTOR * i), X_OFFSET + 10, getHeight() / 2
-		// + Z_OFFSET - (int) (SCALE_FACTOR * i));
-		// }
-
 		if (listSingles != null && showSingles.isSelected()) {
 			for (int i = 0; i < listSingles.size(); i++) {
-				listSingles.get(i).paint(g, chooseColor(listSingles.get(i).id));
+				listSingles.get(i).paint(g, chooseColor(listSingles.get(i)));
 			}
 
 		}
 
-		//
 		if (listMean != null && showMean.isSelected()) {
 			System.out.println("Size: " + listMean.size());
 			for (int i = 0; i < listMean.size(); i++) {
 				// System.out.println("Size of List with id: "
 				// + listMean.get(i).id + "Size: "
 				// + listMean.get(i).dataList.size());
-				listMean.get(i).paint(g, chooseColor(listMean.get(i).id));
-				if (chooseColor(listMean.get(i).id) != null) {
+				listMean.get(i).paint(g, chooseColor(listMean.get(i)));
+				if (chooseColor(listMean.get(i)) != null) {
 					g.drawString(
 							"Winkel für: "
-									+ listMean.get(i).id
+									+ listMean.get(i).getID()
 									+ " = "
 									+ listMean.get(i).getAngleOnIndex(
 											slideAngles.getValue()),
-							getWidth() - 200, 500 + 30 * listMean.get(i).id);
+							getWidth() - 200, 500 + 30 * listMean.get(i).getID());
 				}
 			}
 
 		}
-		if (filteredList != null && showFiltered.isSelected()) {
-			for (int i = 0; i < filteredList.size(); i++) {
-				filteredList.get(i).paint(g,
-						chooseColor(filteredList.get(i).id));
+		if (listFilteredSingles != null && showFilteredSingle.isSelected()) {
+			for (int i = 0; i < listFilteredSingles.size(); i++) {
+				listFilteredSingles.get(i).paint(g,
+						chooseColor(listFilteredSingles.get(i)));
 			}
 		}
-
+		
+		if (listFilteredMean != null && showFilteredMean.isSelected()) {
+			for (int i = 0; i < listFilteredMean.size(); i++) {
+				listFilteredMean.get(i).paint(g,
+						chooseColor(listFilteredMean.get(i)));
+			}
+		}
 	}
 }

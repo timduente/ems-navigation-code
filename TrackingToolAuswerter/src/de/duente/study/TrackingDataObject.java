@@ -7,13 +7,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 
+/** Das Objekt repräsentiert einen einzelnen aufgenommenen Datensatz.
+ * 
+ * @author Tim Dünte
+ *
+ */
 public class TrackingDataObject implements Comparable<TrackingDataObject> {
 	float x, y, z;
-	long frameNumber;
+	private long frameNumber;
 	boolean signalOn;
 	float yaw;
-	String dateSend;
-	String dateReceive;
+	private String dateSend;
+	private String dateReceive;
 
 	private int mergeCount = 1;
 	
