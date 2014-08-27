@@ -107,7 +107,7 @@ public class ResultViewer extends JFrame {
 
 		showFilteredSingle.setBounds(160, 40, 140, 20);
 		cp.add(showFilteredSingle);
-		
+
 		showFilteredMean.addActionListener(repaintActionListener);
 
 		showFilteredMean.setBounds(160, 60, 140, 20);
@@ -152,13 +152,14 @@ public class ResultViewer extends JFrame {
 		new ResultViewer();
 	}
 
-	private void writeSingleAngleDataToFile(
-			float anglePerMeter, TrackingDataObjectList tDOList) {
+	private void writeSingleAngleDataToFile(float anglePerMeter,
+			TrackingDataObjectList tDOList) {
 		// System.out.println("Id: " + id + " Angle: " + anglePerMeter);
 		try {
-
-			singleAngleWriter.append(tDOList.getID() + SEPERATOR + tDOList.getCount() + SEPERATOR
-					+ anglePerMeter + SEPERATOR + "\n");
+			String toWrite = tDOList.getID() + SEPERATOR
+					+ tDOList.getCount() + SEPERATOR + anglePerMeter
+					+ SEPERATOR + "\n";
+			singleAngleWriter.append(toWrite.replace('.', ','));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -219,7 +220,8 @@ public class ResultViewer extends JFrame {
 		repaint();
 	}
 
-	private void printAngleForVectorList(ArrayList<Vector> vectors, TrackingDataObjectList tDOList) {
+	private void printAngleForVectorList(ArrayList<Vector> vectors,
+			TrackingDataObjectList tDOList) {
 		// System.out.println("Laenge der Vektorliste: " + vectors.size());
 
 		float anglePerMeter = 0.0f;
@@ -253,11 +255,11 @@ public class ResultViewer extends JFrame {
 			}
 			length = length + vectors.get(j).getLength();
 		}
-
-		// System.out.println("winkel pro meter vorher: "+anglePerMeter +
-		// ", Laenge: "+ length);
+//		System.out.println("ID: " + tDOList.getID() + "; Count: " +tDOList.getCount() + " TDOListengröße " + tDOList.getSize());
+//		System.out.println("winkel pro meter vorher: "+anglePerMeter +
+//		 ", Laenge: "+ length);
 		anglePerMeter = anglePerMeter / length;
-		// System.out.println("winkel pro meter nachher: "+anglePerMeter);
+//		System.out.println("winkel pro meter nachher: "+anglePerMeter);
 		writeSingleAngleDataToFile(anglePerMeter, tDOList);
 
 	}
@@ -355,7 +357,8 @@ public class ResultViewer extends JFrame {
 									+ " = "
 									+ listMean.get(i).getAngleOnIndex(
 											slideAngles.getValue()),
-							getWidth() - 200, 500 + 30 * listMean.get(i).getID());
+							getWidth() - 200, 500 + 30 * listMean.get(i)
+									.getID());
 				}
 			}
 
@@ -366,7 +369,7 @@ public class ResultViewer extends JFrame {
 						chooseColor(listFilteredSingles.get(i)));
 			}
 		}
-		
+
 		if (listFilteredMean != null && showFilteredMean.isSelected()) {
 			for (int i = 0; i < listFilteredMean.size(); i++) {
 				listFilteredMean.get(i).paint(g,

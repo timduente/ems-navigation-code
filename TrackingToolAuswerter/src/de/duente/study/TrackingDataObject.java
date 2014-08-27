@@ -7,10 +7,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 
-/** Das Objekt repräsentiert einen einzelnen aufgenommenen Datensatz.
+/**
+ * Das Objekt repräsentiert einen einzelnen aufgenommenen Datensatz.
  * 
  * @author Tim Dünte
- *
+ * 
  */
 public class TrackingDataObject implements Comparable<TrackingDataObject> {
 	float x, y, z;
@@ -21,9 +22,8 @@ public class TrackingDataObject implements Comparable<TrackingDataObject> {
 	private String dateReceive;
 
 	private int mergeCount = 1;
-	
-	public TrackingDataObject(float x, float z, 
-			float yaw) {
+
+	public TrackingDataObject(float x, float z, float yaw) {
 		this.x = x;
 		this.y = 0.0f;
 		this.z = z;
@@ -85,6 +85,9 @@ public class TrackingDataObject implements Comparable<TrackingDataObject> {
 	static ArrayList<TrackingDataObjectList> parseFileIntoSortedTrackingDataObjectList(
 			File file) {
 
+		String lastDateSignalOn = "01-01-1970 01:00:00:000";
+		String temporaryDateSignalOn = "";
+
 		ArrayList<TrackingDataObjectList> trackingData = new ArrayList<TrackingDataObjectList>();
 
 		TrackingDataObjectList tDOList = null;
@@ -97,31 +100,46 @@ public class TrackingDataObject implements Comparable<TrackingDataObject> {
 
 			String line;
 			String[] data;
+			TrackingDataObject dataObject = null;
 			while (bufferedReader.ready()) {
 				line = bufferedReader.readLine();
 				data = line.split(";");
 
-				if (data.length >= 11) {
+				if (data.length >= 12) {
 					if (tDOList == null) {
 						tDOList = new TrackingDataObjectList(
 								Integer.parseInt(data[2]),
 								Integer.parseInt(data[1]),
 								Integer.parseInt(data[0]));
 					}
-					TrackingDataObject dataObject = new TrackingDataObject(
+					dataObject = new TrackingDataObject(
 							Float.parseFloat(data[3]),
 							Float.parseFloat(data[4]),
 							Float.parseFloat(data[5]), Long.parseLong(data[6]),
 							Float.parseFloat(data[7]), data[8], data[9],
 							(Integer.parseInt(data[10]) == 1));
 
+					temporaryDateSignalOn = data[11];
+
+					if (!data[11].equals(lastDateSignalOn)
+							&& data[11].compareTo(data[8]) < 0) {
+						// if(!dataObject.signalOn){
+						// System.err.println(dataObject);
+						// }
+						dataObject.signalOn = true;
+						// System.out.println(data[11] + "Verglichen mit: " +
+						// data[8]);
+					} else {
+						// if(dataObject.signalOn){
+						// System.err.println(dataObject);
+						// }
+						dataObject.signalOn = false;
+					}
+
 					tDOList.addTDOtoList(dataObject);
-					// if (data[3].startsWith("0.000")) {
-					// System.out.println("Geparste NULL: "
-					// + Float.parseFloat(data[3]) + " " + data[3]);
-					// }
 				} else {
 					if (tDOList != null) {
+						lastDateSignalOn = temporaryDateSignalOn;
 						tDOList.sort();
 						trackingData.add(tDOList);
 						tDOList = null;
@@ -164,9 +182,9 @@ public class TrackingDataObject implements Comparable<TrackingDataObject> {
 		y = y / mergeCount;
 		yaw = yaw / mergeCount;
 	}
-	
-	public String toString(){
-		return "x: " + x + "; z: " + z;
+
+	public String toString() {
+		return "x: " + x + "; z: " + z + "; Signal ON: " + signalOn;
 	}
 
 }

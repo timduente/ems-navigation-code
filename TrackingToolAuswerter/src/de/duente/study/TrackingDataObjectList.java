@@ -21,12 +21,12 @@ public class TrackingDataObjectList implements
 	private int specialPaintIndex = 0;
 
 	private ArrayList<TrackingDataObject> dataList;
-	
-	public int getID(){
+
+	public int getID() {
 		return id;
 	}
-	
-	public int getCount(){
+
+	public int getCount() {
 		return count;
 	}
 
@@ -42,6 +42,11 @@ public class TrackingDataObjectList implements
 	}
 
 	public ArrayList<Vector> getVectors() {
+		if(count == 37){
+			for(int i = 0; i< dataList.size(); i++){
+				System.out.println(dataList.get(i));
+			}
+		}
 		ArrayList<Vector> vectors = new ArrayList<Vector>();
 		boolean filterForBaseLines = false;
 		for (int i = 0; i < dataList.size() - 1;) {
@@ -70,6 +75,7 @@ public class TrackingDataObjectList implements
 				i = j;
 			}
 		}
+		//System.out.println("^^ "+ vectors.size());
 		return vectors;
 	}
 
@@ -94,7 +100,7 @@ public class TrackingDataObjectList implements
 		for (int i = 0; i < dataList.size(); i++) {
 			t = dataList.get(i);
 
-			if (b && t.signalOn) {
+			if (b && t.signalOn && t.isPositionValid()) {
 				float xOffset = t.x;
 				b = false;
 				TrackingDataObject other;
@@ -270,7 +276,6 @@ public class TrackingDataObjectList implements
 						(int) (tdo.z * ResultViewer.SCALE_FACTOR)
 								+ ResultViewer.Z_OFFSET - (int) size / 2, size,
 						size);
-				// }
 			}
 		}
 	}
