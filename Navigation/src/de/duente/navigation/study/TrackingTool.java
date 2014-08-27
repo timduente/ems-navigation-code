@@ -386,6 +386,7 @@ public class TrackingTool extends Activity {
 		}
 		this.updateView();
 		signalStopTime = 0;
+		signalStartTime = 0;
 		startSignal.setEnabled(false);
 
 		writeLineToFile("");
@@ -753,7 +754,7 @@ public class TrackingTool extends Activity {
 				trackedData.append(';');
 				trackedData.append(participant.getActualLevel());
 				trackedData.append(';');
-				trackedData.append(progress[0]);
+				trackedData.append(progress[0].replace('.', ','));
 				trackedData.append(progress[1]);
 				trackedData.append((isSignalOnInCurrentPicture ? signalStarted
 						: 0));
