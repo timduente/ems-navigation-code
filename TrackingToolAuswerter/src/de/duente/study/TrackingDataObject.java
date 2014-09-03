@@ -15,7 +15,7 @@ import java.util.Collections;
  */
 public class TrackingDataObject implements Comparable<TrackingDataObject> {
 	float x, y, z;
-	private long frameNumber;
+	long frameNumber;
 	boolean signalOn;
 	float yaw;
 	private String dateSend;
@@ -23,12 +23,12 @@ public class TrackingDataObject implements Comparable<TrackingDataObject> {
 
 	private int mergeCount = 1;
 
-	public TrackingDataObject(float x, float z, float yaw) {
+	public TrackingDataObject(float x, float z, float yaw, long frameNumber) {
 		this.x = x;
 		this.y = 0.0f;
 		this.z = z;
 		this.yaw = yaw;
-		this.frameNumber = 0;
+		this.frameNumber = frameNumber;
 		this.signalOn = true;
 		this.dateSend = "";
 		this.dateReceive = "";
@@ -121,24 +121,45 @@ public class TrackingDataObject implements Comparable<TrackingDataObject> {
 
 					temporaryDateSignalOn = data[11];
 
-					if (!data[11].equals(lastDateSignalOn)
-							&& data[11].compareTo(data[8]) < 0) {
-						// if(!dataObject.signalOn){
-						// System.err.println(dataObject);
-						// }
-						dataObject.signalOn = true;
-						// System.out.println(data[11] + "Verglichen mit: " +
-						// data[8]);
-					} else {
-						// if(dataObject.signalOn){
-						// System.err.println(dataObject);
-						// }
-						dataObject.signalOn = false;
-					}
+//					if (!data[11].equals(lastDateSignalOn)
+//							&& data[11].compareTo(data[8]) < 0) {
+//						// if(!dataObject.signalOn){
+//						// System.err.println(dataObject);
+//						// }
+//						dataObject.signalOn = true;
+//						// System.out.println(data[11] + "Verglichen mit: " +
+//						// data[8]);
+//					} else {
+//						// if(dataObject.signalOn){
+//						// System.err.println(dataObject);
+//						// }
+//						dataObject.signalOn = false;
+//					}
 
 					tDOList.addTDOtoList(dataObject);
 				} else {
 					if (tDOList != null) {
+						//TODO: Über Liste iterieren. Eigentlich nur Bedingung oben durchtesten. die frage ob 80ms Verzögerungszeit bis Signal kommt noch einberechnen??
+						// 80ms Verzögerungszeit einberechnet. 
+						for(int i = 0; i < tDOList.getSize(); i++){
+							TrackingDataObject tDO= tDOList.getTDO(i);
+							if ( temporaryDateSignalOn.compareTo(tDO.dateSend) < 0) {
+								// if(!dataObject.signalOn){
+								// System.err.println(dataObject);
+								// }
+								tDO.signalOn = true;
+								// System.out.println(data[11] + "Verglichen mit: " +
+								// data[8]);
+							} else {
+								// if(dataObject.signalOn){
+								// System.err.println(dataObject);
+								// }
+								tDO.signalOn = false;
+							}
+							
+						}
+						
+						
 						lastDateSignalOn = temporaryDateSignalOn;
 						tDOList.sort();
 						trackingData.add(tDOList);
@@ -177,6 +198,10 @@ public class TrackingDataObject implements Comparable<TrackingDataObject> {
 	}
 
 	public void mean() {
+		if(mergeCount < 5){
+			z = 0.0f; x = 0.0f; y =0.0f;
+			return;
+		}
 		z = z / mergeCount;
 		x = x / mergeCount;
 		y = y / mergeCount;

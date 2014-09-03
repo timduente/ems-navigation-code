@@ -1,5 +1,7 @@
 package de.duente.study;
 
+import java.util.ArrayList;
+
 /**
  * Diese Klasse repräsentiert einen 2D-Vektor.
  * 
@@ -10,6 +12,8 @@ public class Vector {
 	// 0 ist X, 1 ist Z
 	private float[] position = new float[2];
 	private float length = 0.0f;
+	long firstFrame;
+	long lastFrame;
 
 	/**
 	 * Gibt die Länge des Winkels zurück.
@@ -32,12 +36,22 @@ public class Vector {
 	 *            X-Koordinate von Vektor 2
 	 * @param z2
 	 *            Z-Koordinate von Vektor 2
+	 * 
 	 */
-	public Vector(float x1, float z1, float x2, float z2) {
+	public Vector(float x1, float z1, float x2, float z2, long firstFrame,
+			long lastFrame) {
 		position[0] = x2 - x1;
 		position[1] = z2 - z1;
 		length = (float) Math.sqrt(position[0] * position[0] + position[1]
 				* position[1]);
+		this.firstFrame = firstFrame;
+		this.lastFrame = lastFrame;
+
+		if (this.length == 0.0f) {
+			System.err.println("Fehler: Frame ids: " + firstFrame + " x1: "
+					+ x1 + " z1: " + z1 + " bis " + lastFrame + " x2: " + x2
+					+ " z2: " + z2);
+		}
 	}
 
 	/**
@@ -56,6 +70,8 @@ public class Vector {
 		if (Float.isNaN(length)) {
 			System.err.println("NAN-ERROR" + this);
 		}
+		firstFrame = 0;
+		lastFrame = 0;
 	}
 
 	/**
@@ -96,6 +112,23 @@ public class Vector {
 		} else {
 			return -angle;
 		}
+	}
+
+	public static float getVelocity(ArrayList<Vector> vectors) {
+		if (vectors.size() == 0) {
+			return 0.0f;
+		}
+		float totalLength = 0.0f;
+		for (int i = 0; i < vectors.size(); i++) {
+			totalLength = totalLength + vectors.get(i).length;
+		}
+
+		float velocity = totalLength
+				/ ((vectors.get(vectors.size() - 1).lastFrame - vectors.get(0).firstFrame) * 0.033333333f);
+		// System.out.println("Länge: " + totalLength + " ;Frames: "
+		// +(vectors.get(vectors.size()-1).lastFrame-vectors.get(0).firstFrame));
+
+		return velocity;
 	}
 
 	@Override

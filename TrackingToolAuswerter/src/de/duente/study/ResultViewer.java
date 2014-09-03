@@ -43,6 +43,9 @@ public class ResultViewer extends JFrame {
 	public final static int Z_OFFSET = 150;
 
 	private FileWriter singleAngleWriter;
+	private FileWriter singleAngleFilteredWriter;
+	
+	private File lastFileOpened;
 
 	private Container cp;
 	private ArrayList<TrackingDataObjectList> listSingles;
@@ -51,6 +54,7 @@ public class ResultViewer extends JFrame {
 	private ArrayList<TrackingDataObjectList> listFilteredMean;
 
 	private static final String SINGLE_ANGLE_HEAD = "ID;Count;Angle per Meter;\n";
+	private static final String SINGLE_ANGLE_FILTERED_HEAD = "ID;Count;Angle per Meter;velocity\n";
 	private static final String SEPERATOR = ";";
 	private static final String TITEL = "Result Viewer";
 
@@ -61,22 +65,27 @@ public class ResultViewer extends JFrame {
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		cp = getContentPane();
 		cp.setLayout(null);
+		lastFileOpened = null;
 
 		loadFile.setBounds(0, 0, 140, 20);
 		loadFile.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
-				JFileChooser chooser = new JFileChooser();
+				JFileChooser chooser = new JFileChooser(lastFileOpened);
 				FileNameExtensionFilter filter = new FileNameExtensionFilter(
 						"TXT & CSV Files", "txt", "csv");
 				chooser.setFileFilter(filter);
+				
+
+				
 				int returnVal = chooser.showOpenDialog((Component) actionEvent
 						.getSource());
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					System.out.println("You chose to open this file: "
-							+ chooser.getSelectedFile().getName());
+//					System.out.println("You chose to open this file: "
+//							+ chooser.getSelectedFile().getName());
 					File file = chooser.getSelectedFile();
+					lastFileOpened = file;
 
 					processFile(file);
 				}
@@ -123,10 +132,10 @@ public class ResultViewer extends JFrame {
 			}
 
 		});
-		cp.add(slideAngles);
+		//cp.add(slideAngles);
 
 		slideLabel.setBounds(20, 80, 80, 20);
-		cp.add(slideLabel);
+		//cp.add(slideLabel);
 
 		leftText.setBounds(320, 0, 100, 20);
 		cp.add(leftText);
@@ -152,27 +161,16 @@ public class ResultViewer extends JFrame {
 		new ResultViewer();
 	}
 
-	private void writeSingleAngleDataToFile(float anglePerMeter,
-			TrackingDataObjectList tDOList) {
-		// System.out.println("Id: " + id + " Angle: " + anglePerMeter);
-		try {
-			String toWrite = tDOList.getID() + SEPERATOR
-					+ tDOList.getCount() + SEPERATOR + anglePerMeter
-					+ SEPERATOR + "\n";
-			singleAngleWriter.append(toWrite.replace('.', ','));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
 	public void processFile(File file) {
 		this.setTitle(TITEL + " - " + file.getAbsolutePath());
 		File file_single_angle = new File(file.getParent(), "Winkel_einzel.csv");
+		File file_single_angle_filtered = new File(file.getParent(), "Winkel_einzel_gefiltert.csv");
 
 		try {
 			singleAngleWriter = new FileWriter(file_single_angle);
 			singleAngleWriter.write(SINGLE_ANGLE_HEAD);
+			singleAngleFilteredWriter = new FileWriter(file_single_angle_filtered);
+			singleAngleFilteredWriter.write(SINGLE_ANGLE_FILTERED_HEAD);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -181,11 +179,19 @@ public class ResultViewer extends JFrame {
 		ArrayList<TrackingDataObjectList> list = TrackingDataObject
 				.parseFileIntoSortedTrackingDataObjectList(file);
 		listSingles = list;
+		
+		ArrayList<TrackingDataObjectList> store = new ArrayList<TrackingDataObjectList>();
+		for(int i = 0; i< list.size(); i++){
+			store.add(list.get(i).copy());
+			store.get(store.size()-1).transformCoords();
+			store.get(store.size()-1).fillWithNullData();
+		}
 
 		for (int i = 0; i < list.size(); i++) {
 			listSingles.get(i).transformCoords();
+			listSingles.get(i).cut();
 			ArrayList<Vector> vectors1 = list.get(i).getVectors();
-			printAngleForVectorList(vectors1, list.get(i));
+			printAngleForVectorList(vectors1, list.get(i), false);
 		}
 
 		listMean = new ArrayList<TrackingDataObjectList>();
@@ -193,9 +199,9 @@ public class ResultViewer extends JFrame {
 		for (int j = -4; j < 4; j++) {
 
 			ArrayList<TrackingDataObjectList> sameID = new ArrayList<TrackingDataObjectList>();
-			for (int i = 0; i < listSingles.size(); i++) {
-				if (listSingles.get(i).getID() == j) {
-					sameID.add(listSingles.get(i));
+			for (int i = 0; i < store.size(); i++) {
+				if (store.get(i).getID() == j) {
+					sameID.add(store.get(i));
 				}
 			}
 			System.out
@@ -204,15 +210,20 @@ public class ResultViewer extends JFrame {
 			listFilteredMean.add(TrackingDataObjectList
 					.generateNMeanFilteredList(
 							listMean.get(listMean.size() - 1), 41));
+			listMean.get(listMean.size()-1).writeListToFile(file.getParent(), "Mean unfiltered");
+			listFilteredMean.get(listFilteredMean.size()-1).writeListToFile(file.getParent(), "Mean filtered");
 		}
 		listFilteredSingles = new ArrayList<TrackingDataObjectList>();
 		for (int i = 0; i < listSingles.size(); i++) {
 			listFilteredSingles.add(TrackingDataObjectList
 					.generateNMeanFilteredList(listSingles.get(i), 41));
+			ArrayList<Vector> vectors = listFilteredSingles.get(i).getVectors();
+			printAngleForVectorList(vectors, listFilteredSingles.get(i), true);
 		}
 
 		try {
 			singleAngleWriter.close();
+			singleAngleFilteredWriter.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -221,7 +232,7 @@ public class ResultViewer extends JFrame {
 	}
 
 	private void printAngleForVectorList(ArrayList<Vector> vectors,
-			TrackingDataObjectList tDOList) {
+			TrackingDataObjectList tDOList, boolean filtered) {
 		// System.out.println("Laenge der Vektorliste: " + vectors.size());
 
 		float anglePerMeter = 0.0f;
@@ -239,7 +250,7 @@ public class ResultViewer extends JFrame {
 
 			if (Float.isNaN(angle) || Float.isNaN(vectors.get(j).getLength())
 					|| Float.isNaN(vectors.get(j + 1).getLength())) {
-				System.err.println("Winkel ist NAN. \n"
+				System.err.println("Winkel ist NAN. "+ tDOList.getCount() + "\n"
 						+ vectors.get(j).toString() + "\n"
 						+ vectors.get(j + 1).toString() + "\n");
 			} else {
@@ -260,7 +271,25 @@ public class ResultViewer extends JFrame {
 //		 ", Laenge: "+ length);
 		anglePerMeter = anglePerMeter / length;
 //		System.out.println("winkel pro meter nachher: "+anglePerMeter);
-		writeSingleAngleDataToFile(anglePerMeter, tDOList);
+
+		
+		try {
+			if(filtered){
+				String toWrite = tDOList.getID() + SEPERATOR
+						+ tDOList.getCount() + SEPERATOR + anglePerMeter
+						+ SEPERATOR + Vector.getVelocity(vectors)+ "\n";
+				singleAngleFilteredWriter.append(toWrite.replace('.', ','));
+			}else{
+			String toWrite = tDOList.getID() + SEPERATOR
+					+ tDOList.getCount() + SEPERATOR + anglePerMeter
+					+ SEPERATOR + "\n";
+			singleAngleWriter.append(toWrite.replace('.', ','));
+			}
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 
@@ -350,16 +379,16 @@ public class ResultViewer extends JFrame {
 				// + listMean.get(i).id + "Size: "
 				// + listMean.get(i).dataList.size());
 				listMean.get(i).paint(g, chooseColor(listMean.get(i)));
-				if (chooseColor(listMean.get(i)) != null) {
-					g.drawString(
-							"Winkel für: "
-									+ listMean.get(i).getID()
-									+ " = "
-									+ listMean.get(i).getAngleOnIndex(
-											slideAngles.getValue()),
-							getWidth() - 200, 500 + 30 * listMean.get(i)
-									.getID());
-				}
+//				if (chooseColor(listMean.get(i)) != null) {
+//					g.drawString(
+//							"Winkel für: "
+//									+ listMean.get(i).getID()
+//									+ " = "
+//									+ listMean.get(i).getAngleOnIndex(
+//											slideAngles.getValue()),
+//							getWidth() - 200, 500 + 30 * listMean.get(i)
+//									.getID());
+//				}
 			}
 
 		}

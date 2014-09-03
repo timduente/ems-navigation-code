@@ -2,6 +2,9 @@ package de.duente.study;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -18,7 +21,7 @@ public class TrackingDataObjectList implements
 	private int id;
 	private int count;
 	private int participantId;
-	private int specialPaintIndex = 0;
+	private int specialPaintIndex = -1;
 
 	private ArrayList<TrackingDataObject> dataList;
 
@@ -28,6 +31,10 @@ public class TrackingDataObjectList implements
 
 	public int getCount() {
 		return count;
+	}
+
+	public TrackingDataObject getTDO(int index) {
+		return dataList.get(index);
 	}
 
 	public TrackingDataObjectList(int id, int count, int participantId) {
@@ -42,22 +49,22 @@ public class TrackingDataObjectList implements
 	}
 
 	public ArrayList<Vector> getVectors() {
-		if(count == 37){
-			for(int i = 0; i< dataList.size(); i++){
-				System.out.println(dataList.get(i));
-			}
-		}
+		// if(count == 37){
+		// for(int i = 0; i< dataList.size(); i++){
+		// System.out.println(dataList.get(i));
+		// }
+		// }
 		ArrayList<Vector> vectors = new ArrayList<Vector>();
 		boolean filterForBaseLines = false;
 		for (int i = 0; i < dataList.size() - 1;) {
-			if ((dataList.get(i).signalOn == false && !filterForBaseLines)
+			if ((dataList.get(i).signalOn == false /* && !filterForBaseLines */)
 					|| !dataList.get(i).isPositionValid()) {
 				i++;
 				continue;
 			} else {
-				if (id == 0 || id == -1) {
-					filterForBaseLines = true;
-				}
+				// if (id == 0 || id == -1) {
+				// filterForBaseLines = true;
+				// }
 				int j = i + 1;
 				// Nächsten gültigen Punkt finden
 				for (; j < dataList.size()
@@ -66,16 +73,20 @@ public class TrackingDataObjectList implements
 				}
 				// Damit dann der Differenzvector gebildet werden kann.
 				if (j < dataList.size()) {
-					vectors.add(new Vector(dataList.get(i).x,
-							dataList.get(i).z, dataList.get(j).x, dataList
-									.get(j).z));
+					Vector vector = new Vector(dataList.get(i).x,
+							dataList.get(i).z, dataList.get(j).x,
+							dataList.get(j).z, dataList.get(i).frameNumber,
+							dataList.get(j).frameNumber);
+					if (vector.getLength() != 0.0f) {
+						vectors.add(vector);
+					}
 				}
 				// Damit mit dem nächsten Winkel weiter gemacht werden kann.
 				// System.out.println("j: " + j + " Size: "+ dataList.size());
 				i = j;
 			}
 		}
-		//System.out.println("^^ "+ vectors.size());
+		// System.out.println("^^ "+ vectors.size());
 		return vectors;
 	}
 
@@ -92,6 +103,15 @@ public class TrackingDataObjectList implements
 
 	public void sort() {
 		Collections.sort(dataList);
+	}
+
+	public TrackingDataObjectList copy() {
+		TrackingDataObjectList tdoList = new TrackingDataObjectList(id, count,
+				participantId);
+		for (int i = 0; i < dataList.size(); i++) {
+			tdoList.addTDOtoList(new TrackingDataObject(dataList.get(i)));
+		}
+		return tdoList;
 	}
 
 	public void transformCoords() {
@@ -113,22 +133,18 @@ public class TrackingDataObjectList implements
 				break;
 			}
 		}
-
 		// Abschneiden aller Werte, bei denen noch kein Signal anlag:
-		for (int i = dataList.size() - 1; i >= 0; i--) {
-			if (dataList.get(i).x < 0.0f) {
-				dataList.remove(i);
-			}
-		}
-
 		// Abschneiden von defekten Werten, bei denen die Positionsdaten nicht
 		// getrackt wurden und das Signal aus war. Also Startwerte.
 		for (int i = dataList.size() - 1; i >= 0; i--) {
-			if (!dataList.get(i).isPositionValid() && !dataList.get(i).signalOn) {
+			if (dataList.get(i).x < 0.0f
+					|| (!dataList.get(i).isPositionValid() && !dataList.get(i).signalOn)) {
 				dataList.remove(i);
 			}
 		}
+	}
 
+	public void cut() {
 		for (int i = 0; i < dataList.size(); i++) {
 			TrackingDataObject tdo = dataList.get(i);
 			if (tdo.isPositionValid()
@@ -138,18 +154,36 @@ public class TrackingDataObjectList implements
 				break;
 			}
 		}
+	}
 
+	public void fillWithNullData() {
+		ArrayList<TrackingDataObject> tempTdos = new ArrayList<TrackingDataObject>();
+		for (int i = 0; i < dataList.size() - 1; i++) {
+			long frameDiff = dataList.get(i + 1).frameNumber
+					- dataList.get(i).frameNumber;
+			for (long j = 1; j < frameDiff; j++) {
+				tempTdos.add(new TrackingDataObject(0.0f, 0.0f, 0.0f, dataList
+						.get(i).frameNumber + j, 0.0f, "", "", true));
+			}
+		}
+		dataList.addAll(tempTdos);
+		Collections.sort(dataList);
 	}
 
 	public static TrackingDataObjectList generateNMeanFilteredList(
 			TrackingDataObjectList dataList, int n) {
 		TrackingDataObjectList threeMean = new TrackingDataObjectList(
 				dataList.id, dataList.count, dataList.participantId);
+
 		TrackingDataObject tDO;
 		for (int i = n / 2; i < dataList.dataList.size() - n / 2; i++) {
 			float sumX = 0.0f;
 			float sumZ = 0.0f;
 			int fail = 0;
+
+			if (!dataList.dataList.get(i).isPositionValid()) {
+				continue;
+			}
 
 			for (int j = -n / 2; j <= n / 2; j++) {
 				if (dataList.dataList.get(i + j).isPositionValid()) {
@@ -163,19 +197,33 @@ public class TrackingDataObjectList implements
 				}
 			}
 			tDO = new TrackingDataObject(sumX / (n - fail), sumZ / (n - fail),
-					0.0f);
+					0.0f, dataList.dataList.get(i).frameNumber);
 			threeMean.addTDOtoList(tDO);
 		}
 
 		return threeMean;
 	}
 
-	public static TrackingDataObjectList generateSavitzkyGolayFilteredList() {
-		return null;
-	}
-
 	public static TrackingDataObjectList createMeanList(
 			ArrayList<TrackingDataObjectList> otherTDOLists) {
+
+		int minCount = otherTDOLists.get(0).dataList.size();
+		for (int i = 1; i < otherTDOLists.size(); i++) {
+			int n = otherTDOLists.get(i).dataList.size();
+			if (minCount > n) {
+				minCount = n;
+			}
+		}
+
+		for (int i = 0; i < otherTDOLists.size(); i++) {
+			int n = otherTDOLists.get(i).dataList.size();
+			if (n > minCount) {
+				otherTDOLists.get(i).dataList
+						.removeAll(otherTDOLists.get(i).dataList.subList(
+								minCount, n));
+			}
+		}
+
 		if (otherTDOLists.size() > 0 && otherTDOLists.get(0) != null) {
 			TrackingDataObjectList meanList = new TrackingDataObjectList(
 					otherTDOLists.get(0).id, -1,
@@ -255,6 +303,56 @@ public class TrackingDataObjectList implements
 		}
 		specialPaintIndex = index;
 		return dataList.get(index).yaw;
+	}
+
+	public void writeListToFile(String parent, String folderName) {
+		parent = parent + "\\exports\\"+folderName;
+		File folder = new File(parent);
+		folder.mkdirs();
+		File file = new File(parent, id + "_" + count + ".txt");
+		String direction;
+		int signalStrength = 0;
+		if (id < 0) {
+			direction = "links ";
+			signalStrength = id + 1;
+		} else {
+			direction = "rechts";
+			signalStrength = id;
+		}
+		String intensity = "";
+
+		switch ((int) Math.abs(signalStrength)) {
+		case 0:
+			intensity = "null";
+			break;
+		case 1:
+			intensity = "schwach";
+			break;
+		case 2:
+			intensity = "mittel";
+			break;
+		case 3:
+			intensity = "stark";
+			break;
+
+		}
+
+		direction = direction + " " + intensity;
+
+		try {
+			FileWriter fileWriter = new FileWriter(file);
+			fileWriter.write("\t" + direction +"\t\n" );
+			for (int i = 0; i < dataList.size(); i++) {
+				String toWrite = dataList.get(i).x + "\t" + dataList.get(i).z
+						+ "\t" + dataList.get(i).frameNumber + "\n";
+				fileWriter.write(toWrite.replace(".", ","));
+			}
+
+			fileWriter.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public void paint(Graphics g, Color color) {
