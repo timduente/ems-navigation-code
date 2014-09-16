@@ -63,8 +63,9 @@ void loop() {
 		//char c = (char) bluetooth.read();
 		//Alle Daten die der Bluetoothchip sendet werden an die serielle Verbindung zum PC gesendet
 		//bluetooth.print(command);
-
+//		bluetooth.print(command);
 //		bluetooth.write(';');
+//		bluetooth.flush();
 	}
 
 	//Überprüft ob irgendwo ein Signal beendet werden muss.
