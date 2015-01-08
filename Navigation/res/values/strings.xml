@@ -26,12 +26,12 @@
     <string name="button_text_calibration">Calibration</string>
     <string name="title_activity_tracking_tool">TrackingTool</string>
     <string name="title_activity_calibration_dialog">Calibration Dialog</string>
-    <string name="calibrate_title_left">Kalibrierung links</string>
-    <string name="calibrate_title_right">Kalibrierung rechts</string>
+    <string name="calibrate_title_left">Calibration Left</string>
+    <string name="calibrate_title_right">Calibration Right</string>
     <string name="title_activity_calibration_dialog_angle">Calibration Dialog Angle</string>
-    <string name="button_forward">Weiter</string>
-    <string name="button_back">Zurück</string>
-    <string name="button_test">Testen</string>
+    <string name="button_forward">Forward</string>
+    <string name="button_back">Back</string>
+    <string name="button_test">Test</string>
     <string name="button_stop">Stop</string>
     <string name="title_activity_emsnavigation">EMSNavigation</string>
 

@@ -61,10 +61,10 @@ public class EMSNavigation extends Activity implements OnTouchListener {
 
 		AlertDialog.Builder builder2 = new AlertDialog.Builder(this);
 
-		builder2.setTitle("Verbindung zum Arduino fehlgeschlagen!");
-		builder2.setMessage("Verbindungsversuch erneut starten?");
+		builder2.setTitle("Failed to connect to Arduino!");
+		builder2.setMessage("Try to connect to Arduino again?");
 
-		builder2.setPositiveButton("JA", new DialogInterface.OnClickListener() {
+		builder2.setPositiveButton("YES", new DialogInterface.OnClickListener() {
 
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
@@ -73,7 +73,7 @@ public class EMSNavigation extends Activity implements OnTouchListener {
 			}
 		});
 
-		builder2.setNegativeButton("NEIN",
+		builder2.setNegativeButton("NO",
 				new DialogInterface.OnClickListener() {
 
 					@Override

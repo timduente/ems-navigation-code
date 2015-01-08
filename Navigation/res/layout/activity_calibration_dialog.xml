@@ -17,7 +17,7 @@
         android:layout_gravity="left|top"
         android:layout_marginTop="0dp"
         android:layout_row="1"
-        android:text="Intensität:"
+        android:text="Intensity:"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
@@ -94,6 +94,6 @@
         android1:layout_marginTop="40dp"
         android1:layout_row="4"
         android1:onClick="loadLastCalibSet"
-        android1:text="Lade letzte Kalibrierung" />
+        android1:text="Load last Calibration" />
 
 </GridLayout>

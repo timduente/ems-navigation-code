@@ -34,10 +34,10 @@ public class CalibrationDialogAngle extends Activity implements
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-		builder.setTitle("Wirklich fortfahren?");
-		builder.setMessage("Hast du alle Werte gemessen? Winkel, Spannungen und Ströme?");
+		builder.setTitle("Do you want to continue?");
+		builder.setMessage("Did you measure all values? angle, voltage, current?");
 
-		builder.setPositiveButton("JA", new DialogInterface.OnClickListener() {
+		builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
 
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
@@ -47,7 +47,7 @@ public class CalibrationDialogAngle extends Activity implements
 
 		});
 
-		builder.setNegativeButton("NEIN",
+		builder.setNegativeButton("NO",
 				new DialogInterface.OnClickListener() {
 
 					@Override

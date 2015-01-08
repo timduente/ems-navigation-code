@@ -50,7 +50,7 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/textView2"
         android:layout_alignTop="@+id/spinnerParticipants"
-        android:text="Teilnehmer ID:"
+        android:text="Participant ID:"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <de.duente.navigation.study.TrackingView
@@ -71,8 +71,8 @@
         android:layout_alignTop="@+id/startTracking"
         android:layout_toRightOf="@+id/startTracking"
         android:onClick="calibrate"
-        android:text="Kalibrierung"
-        android:textAppearance="?android:attr/textAppearanceLargeInverse" />
+        android:text="Calibration"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
         android:id="@+id/textRight"
@@ -81,7 +81,7 @@
         android:layout_alignBaseline="@+id/textLeft"
         android:layout_alignBottom="@+id/textLeft"
         android:layout_alignParentRight="true"
-        android:text="Rechts"
+        android:text="Right"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textSize="40sp" />
 
@@ -94,7 +94,7 @@
         android:layout_centerVertical="true"
         android:enabled="false"
         android:onClick="startSignal"
-        android:text="Signal an"
+        android:text="Signal on"
         android:textAppearance="?android:attr/textAppearanceLargeInverse" />
 
     <TextView
@@ -103,7 +103,7 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/startSignal"
         android:layout_alignLeft="@+id/startTracking"
-        android:text="Links"
+        android:text="Left"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textSize="40sp" />
 
@@ -113,6 +113,7 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/trackingView1"
         android:layout_below="@+id/courseID"
+        android:minWidth="64dp"
         android:onClick="startTracking"
         android:text="Tracking Start"
         android:textAppearance="?android:attr/textAppearanceLargeInverse" />
@@ -122,8 +123,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/backButton"
-        android:layout_alignLeft="@+id/textRight"
-        android:text="Anzahl: "
+        android:layout_alignLeft="@+id/backButton"
+        android:text="Count: "
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
